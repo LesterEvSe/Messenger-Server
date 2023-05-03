@@ -17,7 +17,7 @@ CXX           = g++
 DEFINES       = -DQT_QML_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -g -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -std=gnu++1z -Wall -Wextra -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I../Server -I. -I../Server -I/home/zhenia/Qt/5.15.2/gcc_64/include -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore -I. -I/usr/include/libdrm -I. -I/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++
+INCPATH       = -I../Server -I. -I/home/zhenia/Qt/5.15.2/gcc_64/include -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore -I. -I/usr/include/libdrm -I. -I/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++
 QMAKE         = /home/zhenia/Qt/5.15.2/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -54,13 +54,13 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../Server/main.cpp \
 		../Server/server.cpp \
-		../Server/widget.cpp moc_server.cpp \
-		moc_widget.cpp
+		../Server/serverback.cpp moc_server.cpp \
+		moc_serverback.cpp
 OBJECTS       = main.o \
 		server.o \
-		widget.o \
+		serverback.o \
 		moc_server.o \
-		moc_widget.o
+		moc_serverback.o
 DIST          = /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/common/unix.conf \
 		/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/common/linux.conf \
@@ -239,9 +239,9 @@ DIST          = /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/spec_pre.prf \
 		/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/yacc.prf \
 		/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/lex.prf \
 		../Server/Server.pro ../Server/server.hpp \
-		../Server/widget.h ../Server/main.cpp \
+		../Server/serverback.hpp ../Server/main.cpp \
 		../Server/server.cpp \
-		../Server/widget.cpp
+		../Server/serverback.cpp
 QMAKE_TARGET  = Server
 DESTDIR       = 
 TARGET        = Server
@@ -250,7 +250,7 @@ TARGET        = Server
 first: all
 ####### Build rules
 
-Server: ui_widget.h $(OBJECTS)  
+Server: ui_server.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../Server/Server.pro /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++/qmake.conf /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/spec_pre.prf \
@@ -625,9 +625,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Server/server.hpp ../Server/widget.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../Server/main.cpp ../Server/server.cpp ../Server/widget.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../Server/widget.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../Server/server.hpp ../Server/serverback.hpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Server/main.cpp ../Server/server.cpp ../Server/serverback.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../Server/server.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -659,87 +659,10 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++1z -Wall -Wextra -dM -E -o moc_predefs.h /home/zhenia/Qt/5.15.2/gcc_64/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_server.cpp moc_widget.cpp
+compiler_moc_header_make_all: moc_server.cpp moc_serverback.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_server.cpp moc_widget.cpp
+	-$(DEL_FILE) moc_server.cpp moc_serverback.cpp
 moc_server.cpp: ../Server/server.hpp \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpServer \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpserver.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetworkglobal.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobal.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig-bootstrapped.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtcore-config.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsystemdetection.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qprocessordetection.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcompilerdetection.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtypeinfo.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsysinfo.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlogging.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qflags.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbasicatomic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_bootstrap.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qgenericatomic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_cxx11.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_msvc.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobalstatic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmutex.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnumeric.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qversiontagging.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetwork-config.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnamespace.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstring.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qchar.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearray.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qrefcount.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qarraydata.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringliteral.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringalgorithms.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringview.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringbuilder.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlist.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qalgorithms.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiterator.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhashfunctions.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpair.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvector.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainertools_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpoint.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearraylist.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringlist.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qregexp.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringmatcher.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreevent.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qscopedpointer.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmetatype.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvarlengtharray.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainerfwd.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qabstractsocket.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiodevice.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qdebug.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhash.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmap.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtextstream.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlocale.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvariant.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qshareddata.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qset.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontiguouscache.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qhostaddress.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpSocket \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpsocket.h \
-		moc_predefs.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/bin/moc
-	/home/zhenia/Qt/5.15.2/gcc_64/bin/moc $(DEFINES) --include /home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/build-Server-Desktop_Qt_5_15_2_GCC_64bit-Debug/moc_predefs.h -I/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++ -I/home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/Server -I/home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/Server -I/home/zhenia/Qt/5.15.2/gcc_64/include -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore -I. -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Server/server.hpp -o moc_server.cpp
-
-moc_widget.cpp: ../Server/widget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QWidget \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qwidget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
@@ -845,18 +768,95 @@ moc_widget.cpp: ../Server/widget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qtouchdevice.h \
 		moc_predefs.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/bin/moc
-	/home/zhenia/Qt/5.15.2/gcc_64/bin/moc $(DEFINES) --include /home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/build-Server-Desktop_Qt_5_15_2_GCC_64bit-Debug/moc_predefs.h -I/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++ -I/home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/Server -I/home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/Server -I/home/zhenia/Qt/5.15.2/gcc_64/include -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore -I. -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Server/widget.h -o moc_widget.cpp
+	/home/zhenia/Qt/5.15.2/gcc_64/bin/moc $(DEFINES) --include /home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/build-Server-Desktop_Qt_5_15_2_GCC_64bit-Debug/moc_predefs.h -I/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++ -I/home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/Server -I/home/zhenia/Qt/5.15.2/gcc_64/include -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore -I. -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Server/server.hpp -o moc_server.cpp
+
+moc_serverback.cpp: ../Server/serverback.hpp \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpServer \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpserver.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetworkglobal.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobal.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtcore-config.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsysinfo.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlogging.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qflags.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmutex.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnumeric.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qversiontagging.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetwork-config.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnamespace.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstring.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qchar.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearray.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qrefcount.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qarraydata.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringliteral.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringalgorithms.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringview.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlist.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qalgorithms.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiterator.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpair.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvector.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpoint.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringlist.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qregexp.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreevent.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmetatype.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qabstractsocket.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiodevice.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qdebug.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhash.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmap.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtextstream.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlocale.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvariant.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qshareddata.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qset.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qhostaddress.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpSocket \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpsocket.h \
+		moc_predefs.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/bin/moc
+	/home/zhenia/Qt/5.15.2/gcc_64/bin/moc $(DEFINES) --include /home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/build-Server-Desktop_Qt_5_15_2_GCC_64bit-Debug/moc_predefs.h -I/home/zhenia/Qt/5.15.2/gcc_64/mkspecs/linux-g++ -I/home/zhenia/MyFiles/github-projects/Messenger/Messenger-Server/Server -I/home/zhenia/Qt/5.15.2/gcc_64/include -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork -I/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore -I. -I/usr/include/c++/11 -I/usr/include/x86_64-linux-gnu/c++/11 -I/usr/include/c++/11/backward -I/usr/lib/gcc/x86_64-linux-gnu/11/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include ../Server/serverback.hpp -o moc_serverback.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_widget.h
+compiler_uic_make_all: ui_server.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_widget.h
-ui_widget.h: ../Server/widget.ui \
+	-$(DEL_FILE) ui_server.h
+ui_server.h: ../Server/server.ui \
 		/home/zhenia/Qt/5.15.2/gcc_64/bin/uic
-	/home/zhenia/Qt/5.15.2/gcc_64/bin/uic ../Server/widget.ui -o ui_widget.h
+	/home/zhenia/Qt/5.15.2/gcc_64/bin/uic ../Server/server.ui -o ui_server.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -868,7 +868,7 @@ compiler_clean: compiler_moc_predefs_clean compiler_moc_header_clean compiler_ui
 
 ####### Compile
 
-main.o: ../Server/main.cpp ../Server/widget.h \
+main.o: ../Server/main.cpp ../Server/server.hpp \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QWidget \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qwidget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
@@ -972,100 +972,16 @@ main.o: ../Server/main.cpp ../Server/widget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qfiledevice.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qvector2d.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qtouchdevice.h \
-		../Server/server.hpp \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpServer \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpserver.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetworkglobal.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetwork-config.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qabstractsocket.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qhostaddress.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpSocket \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpsocket.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/QCoreApplication \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QApplication \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qapplication.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreapplication.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qeventloop.h
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qeventloop.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qguiapplication.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qinputmethod.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Server/main.cpp
 
 server.o: ../Server/server.cpp ../Server/server.hpp \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpServer \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpserver.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetworkglobal.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobal.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig-bootstrapped.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtcore-config.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsystemdetection.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qprocessordetection.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcompilerdetection.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtypeinfo.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsysinfo.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlogging.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qflags.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbasicatomic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_bootstrap.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qgenericatomic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_cxx11.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_msvc.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobalstatic.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmutex.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnumeric.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qversiontagging.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetwork-config.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnamespace.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstring.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qchar.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearray.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qrefcount.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qarraydata.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringliteral.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringalgorithms.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringview.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringbuilder.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlist.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qalgorithms.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiterator.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhashfunctions.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpair.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvector.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainertools_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpoint.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearraylist.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringlist.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qregexp.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringmatcher.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreevent.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qscopedpointer.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmetatype.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvarlengtharray.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainerfwd.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qabstractsocket.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiodevice.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qdebug.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhash.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmap.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtextstream.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlocale.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvariant.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qshareddata.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qset.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontiguouscache.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer_impl.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qhostaddress.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpSocket \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpsocket.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/QCoreApplication \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreapplication.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qeventloop.h \
-		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/QDebug
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o server.o ../Server/server.cpp
-
-widget.o: ../Server/widget.cpp ../Server/widget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QWidget \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qwidget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qtwidgetsglobal.h \
@@ -1169,14 +1085,126 @@ widget.o: ../Server/widget.cpp ../Server/widget.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qfiledevice.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qvector2d.h \
 		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qtouchdevice.h \
-		ui_widget.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o widget.o ../Server/widget.cpp
+		ui_server.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/QVariant \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QApplication \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qapplication.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreapplication.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qeventloop.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qdesktopwidget.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qguiapplication.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qinputmethod.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QHBoxLayout \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qboxlayout.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qlayout.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qlayoutitem.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qgridlayout.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QLabel \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qlabel.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qframe.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QListView \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qlistview.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qabstractitemview.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qabstractscrollarea.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qabstractitemmodel.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qitemselectionmodel.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qabstractitemdelegate.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qstyleoption.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qabstractspinbox.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qvalidator.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qregularexpression.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtGui/qicon.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qslider.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qabstractslider.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qstyle.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qtabbar.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qtabwidget.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/qrubberband.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtWidgets/QVBoxLayout
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o server.o ../Server/server.cpp
+
+serverback.o: ../Server/serverback.cpp ../Server/serverback.hpp \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpServer \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpserver.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetworkglobal.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobal.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig-bootstrapped.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qconfig.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtcore-config.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsystemdetection.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qprocessordetection.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcompilerdetection.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtypeinfo.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsysinfo.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlogging.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qflags.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbasicatomic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qgenericatomic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_cxx11.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qatomic_msvc.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qglobalstatic.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmutex.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnumeric.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qversiontagging.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtnetwork-config.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qnamespace.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstring.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qchar.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearray.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qrefcount.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qarraydata.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringliteral.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringalgorithms.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringview.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringbuilder.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlist.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qalgorithms.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiterator.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhashfunctions.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpair.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvector.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainertools_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qpoint.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qbytearraylist.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringlist.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qregexp.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qstringmatcher.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcoreevent.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qscopedpointer.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmetatype.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvarlengtharray.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontainerfwd.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qobject_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qabstractsocket.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qiodevice.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qdebug.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qhash.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qmap.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qtextstream.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qlocale.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qvariant.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qshareddata.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qset.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qcontiguouscache.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qhostaddress.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/QTcpSocket \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtNetwork/qtcpsocket.h \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/QDebug \
+		/home/zhenia/Qt/5.15.2/gcc_64/include/QtCore/QByteArray
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o serverback.o ../Server/serverback.cpp
 
 moc_server.o: moc_server.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_server.o moc_server.cpp
 
-moc_widget.o: moc_widget.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_widget.o moc_widget.cpp
+moc_serverback.o: moc_serverback.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_serverback.o moc_serverback.cpp
 
 ####### Install
 

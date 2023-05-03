@@ -1,32 +1,22 @@
 #include "server.hpp"
+#include "ui_server.h"
 
-#include <QCoreApplication>
-#include <QDebug>
+#include <QScreen>
 
-Server::Server(QObject *parent) :
-    QTcpServer(parent), socket(nullptr)
+Server::Server(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::Server)
 {
-    listen(QHostAddress::Any, 12345);
-    qDebug() << "Server started. Listening on port 12345...";
+    ui->setupUi(this);
+    setWindowTitle("Server");
+    QRect screenGeometry = QApplication::primaryScreen()->geometry();
+    int w = screenGeometry.width();
+    int h = screenGeometry.height();
+    move((w - width())/2, (h - height())/2);
 }
 
-void Server::incomingConnection(qintptr socketDescriptor)
+Server::~Server()
 {
-    socket = new QTcpSocket(this);
-    socket->setSocketDescriptor(socketDescriptor);
-
-    qDebug() << "Client connected";
-    connect(socket, &QTcpSocket::readyRead, this, [this]() {
-        QByteArray data = socket->readAll();
-        qDebug() << "Message received from client: " << data.constData();
-
-        // Send the message back to the client,
-        // otherwise it will not work
-        socket->write(data);
-    });
-
-    connect(socket, &QTcpSocket::disconnected, this, [this]() {
-        qDebug() << "Client disconnected";
-        socket->deleteLater();
-    });
+    delete ui;
 }
+

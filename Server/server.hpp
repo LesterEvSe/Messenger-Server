@@ -1,20 +1,20 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <QTcpServer>
-#include <QTcpSocket>
+#include <QWidget>
 
-class Server : public QTcpServer
+QT_BEGIN_NAMESPACE
+namespace Ui { class Server; }
+QT_END_NAMESPACE
+
+class Server : public QWidget
 {
     Q_OBJECT
-public:
-    explicit Server(QObject *parent = nullptr);
-
-protected:
-    void incomingConnection(qintptr socketDescriptor) override;
-
 private:
-    QTcpSocket *socket;
-};
+    Ui::Server *ui;
 
+public:
+    Server(QWidget *parent = nullptr);
+    ~Server();
+};
 #endif // SERVER_HPP

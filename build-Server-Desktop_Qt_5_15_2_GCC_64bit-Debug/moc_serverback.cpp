@@ -1,5 +1,5 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'widget.h'
+** Meta object code from reading C++ file 'serverback.hpp'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.15.2)
 **
@@ -7,11 +7,11 @@
 *****************************************************************************/
 
 #include <memory>
-#include "../Server/widget.h"
+#include "../Server/serverback.hpp"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'widget.h' doesn't include <QObject>."
+#error "The header file 'serverback.hpp' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.15.2. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -21,25 +21,25 @@
 QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
-struct qt_meta_stringdata_Widget_t {
+struct qt_meta_stringdata_ServerBack_t {
     QByteArrayData data[1];
-    char stringdata0[7];
+    char stringdata0[11];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_Widget_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_ServerBack_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_Widget_t qt_meta_stringdata_Widget = {
+static const qt_meta_stringdata_ServerBack_t qt_meta_stringdata_ServerBack = {
     {
-QT_MOC_LITERAL(0, 0, 6) // "Widget"
+QT_MOC_LITERAL(0, 0, 10) // "ServerBack"
 
     },
-    "Widget"
+    "ServerBack"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_Widget[] = {
+static const uint qt_meta_data_ServerBack[] = {
 
  // content:
        8,       // revision
@@ -55,7 +55,7 @@ static const uint qt_meta_data_Widget[] = {
        0        // eod
 };
 
-void Widget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void ServerBack::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     Q_UNUSED(_o);
     Q_UNUSED(_id);
@@ -63,32 +63,32 @@ void Widget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
     Q_UNUSED(_a);
 }
 
-QT_INIT_METAOBJECT const QMetaObject Widget::staticMetaObject = { {
-    QMetaObject::SuperData::link<QWidget::staticMetaObject>(),
-    qt_meta_stringdata_Widget.data,
-    qt_meta_data_Widget,
+QT_INIT_METAOBJECT const QMetaObject ServerBack::staticMetaObject = { {
+    QMetaObject::SuperData::link<QTcpServer::staticMetaObject>(),
+    qt_meta_stringdata_ServerBack.data,
+    qt_meta_data_ServerBack,
     qt_static_metacall,
     nullptr,
     nullptr
 } };
 
 
-const QMetaObject *Widget::metaObject() const
+const QMetaObject *ServerBack::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *Widget::qt_metacast(const char *_clname)
+void *ServerBack::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_Widget.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_ServerBack.stringdata0))
         return static_cast<void*>(this);
-    return QWidget::qt_metacast(_clname);
+    return QTcpServer::qt_metacast(_clname);
 }
 
-int Widget::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int ServerBack::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
-    _id = QWidget::qt_metacall(_c, _id, _a);
+    _id = QTcpServer::qt_metacall(_c, _id, _a);
     return _id;
 }
 QT_WARNING_POP

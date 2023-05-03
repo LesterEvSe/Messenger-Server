@@ -1,11 +1,13 @@
-#include "widget.h"
 #include "server.hpp"
+#include "serverback.hpp"
 
-#include <QCoreApplication>
+#include <QApplication>
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
-    Server server;
+    QApplication a(argc, argv);
+    ServerBack sb;
+    Server w;
+    w.show();
     return a.exec();
 }
