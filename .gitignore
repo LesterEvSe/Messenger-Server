@@ -72,3 +72,7 @@ CMakeLists.txt.user*
 *.dll
 *.exe
 
+
+# Custom ignore list
+*build*
+
