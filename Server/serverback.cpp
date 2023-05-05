@@ -8,8 +8,8 @@ ServerBack::ServerBack(QObject *parent) :
     socket(nullptr),
     nextBlockSize(0)
 {
-    if (listen(QHostAddress::Any, 1234))
-        qDebug() << "Start listening port 1234...";
+    if (listen(QHostAddress::Any, 1326))
+        qDebug() << "Start listening port 1326...";
     else
         qDebug() << "Error";
 }
