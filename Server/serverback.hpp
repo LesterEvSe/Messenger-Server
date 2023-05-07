@@ -3,24 +3,22 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QByteArray>
-#include <QVector>
-#include <QTime>
+
+#include <QHash>
+#include <QJsonObject>
 
 class ServerBack : public QTcpServer
 {
     Q_OBJECT
 
 private:
-    // Here we store sockets with clients
-    QVector <QTcpSocket*> Sockets;
+    // Here we store the username and its socket
+    QHash<QString, QTcpSocket*> Sockets;
+    void sendToClient        (const QJsonObject& message);
 
-    // This data is transferred from the server
-    // to the client and vice versa
-    QByteArray Data;
-    quint16 nextBlockSize;
-
-    void sendToClient(QString str);
+    QJsonObject registration (const QJsonObject& message);
+    QJsonObject login        (const QJsonObject& message);
+    QJsonObject message      (const QJsonObject& message);
 
 private slots:
     void incomingConnection(qintptr socketDescriptor);
