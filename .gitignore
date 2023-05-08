@@ -75,4 +75,6 @@ CMakeLists.txt.user*
 
 # Custom ignore list
 *build*
-
+*.idea
+*.sqlite
+*.db

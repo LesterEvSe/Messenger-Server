@@ -14,7 +14,7 @@ ServerBack::ServerBack(QObject *parent) :
     m_database(QSqlDatabase::addDatabase("QSQLITE")),
     m_socket(nullptr)
 {
-    QString DBName = "messenger.sqlite";
+    QString DBName = "../messenger.sqlite";
     m_database.setDatabaseName(DBName);
 
     if (!m_database.open()) {
@@ -46,6 +46,26 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
     });
 
     qDebug() << "Client connected" << socketDescriptor;
+}
+
+void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client)
+{
+    QByteArray data = QJsonDocument(message).toJson(QJsonDocument::Compact);
+    QDataStream out(m_socket);
+
+    // To avoid errors, as it is constantly updated
+    out.setVersion(QDataStream::Qt_5_15);
+
+    // Write the size of transferred data in the SAME TYPE AS m_block_size,
+    // otherwise data will not be transferred correct!!!
+    out << decltype(m_block_size)(data.size());
+
+    // Writing data as "raw bytes" with size 'data.size()'
+    out.writeRawData(data.constData(), data.size());
+
+    // Forcing all data to be sent at once
+    // to avoid multithreading problems when data accumulate in the buffer
+    client->flush();
 }
 
 void ServerBack::slotReadyRead()
@@ -115,20 +135,6 @@ void ServerBack::slotReadyRead()
     else
         // For users who want to break the system
         return;
-}
-
-void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client)
-{
-    QByteArray data = QJsonDocument(message).toJson(QJsonDocument::Compact);
-    QDataStream out(m_socket);
-    out.setVersion(QDataStream::Qt_5_15);
-
-    out << quint16(data.size());
-    out.writeRawData(data.constData(), data.size());
-
-    // Forcing all data to be sent at once
-    // to avoid multithreading problems when data accumulate in the buffer
-    client->flush();
 }
 
 QJsonObject ServerBack::registration(const QJsonObject &message)

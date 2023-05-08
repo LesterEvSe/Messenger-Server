@@ -13,7 +13,7 @@ class ServerBack : public QTcpServer
     Q_OBJECT
 
 private:
-    quint16 m_block_size;
+    qint64 m_block_size;
     QSqlDatabase m_database;
     QSqlQuery m_query;
 
