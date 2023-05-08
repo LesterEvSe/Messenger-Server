@@ -1,5 +1,6 @@
-QT       += core gui
-QT       += network
+QT       += core gui network sql
+
+LIBS += -L/usr/lib/python3.10 -lsqlite3
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
