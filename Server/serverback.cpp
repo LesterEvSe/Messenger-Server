@@ -1,21 +1,24 @@
 #include "serverback.hpp"
 
 #include <QJsonDocument>
+#include <QJsonParseError>
 #include <QByteArray>
-#include<QFileInfo>
+#include <QFileInfo>
 
+#include <QMessageBox>
 #include <QDebug> // Need to delete later
 
 ServerBack::ServerBack(QObject *parent) :
     QTcpServer(parent),
-    database(QSqlDatabase::addDatabase("QSQLITE")),
-    socket(nullptr)
+    m_block_size(0),
+    m_database(QSqlDatabase::addDatabase("QSQLITE")),
+    m_socket(nullptr)
 {
     QString DBName = "messenger.sqlite";
-    database.setDatabaseName(DBName);
+    m_database.setDatabaseName(DBName);
 
-    if (!database.open()) {
-        qDebug() << "Failed to connect to database: " << database.lastError();
+    if (!m_database.open()) {
+        qDebug() << "Failed to connect to database: " << m_database.lastError();
     }
 
     QSqlQuery query("SELECT name FROM sqlite_master WHERE type='table' AND name='users';");
@@ -31,15 +34,15 @@ ServerBack::ServerBack(QObject *parent) :
 
 void ServerBack::incomingConnection(qintptr socketDescriptor)
 {
-    socket = new QTcpSocket(this);
+    m_socket = new QTcpSocket(this);
 
     // The descriptor is a positive number that identifies
     // the input/output stream
-    socket->setSocketDescriptor(socketDescriptor);
-    connect(socket, &QTcpSocket::readyRead, this, &ServerBack::slotReadyRead);
-    connect(socket, &QTcpSocket::disconnected, this, [=](){
+    m_socket->setSocketDescriptor(socketDescriptor);
+    connect(m_socket, &QTcpSocket::readyRead, this, &ServerBack::slotReadyRead);
+    connect(m_socket, &QTcpSocket::disconnected, this, [=](){
         qDebug() << "disconnected" << socketDescriptor;
-        socket->deleteLater();
+        m_socket->deleteLater();
     });
 
     qDebug() << "Client connected" << socketDescriptor;
@@ -47,10 +50,42 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
 
 void ServerBack::slotReadyRead()
 {
-    socket = qobject_cast<QTcpSocket*>(sender());
-    QByteArray data = socket->readAll();
-    QJsonDocument doc = QJsonDocument::fromJson(data);
+    m_socket = qobject_cast<QTcpSocket*>(sender());
+
+    // First of all we read the size of the message to be transmitted
+    QDataStream in(m_socket);
+    in.setVersion(QDataStream::Qt_5_15);
+    if (in.status() != QDataStream::Ok) {
+        qDebug() << "DataStream error";
+//        QMessageBox::critical(this, "Error", "DataStream error");
+        return;
+    }
+
+    if (m_block_size == 0) {
+        if (m_socket->bytesAvailable() < static_cast<qint64>(sizeof(m_block_size)))
+            return;
+        in >> m_block_size;
+    }
+
+    // if the data came in less than agreed
+    if (m_socket->bytesAvailable() < m_block_size)
+        return;
+
+    // when we got the size, then we get our data
+    QByteArray data = m_socket->read(m_block_size);
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error != QJsonParseError::NoError) {
+        qDebug() << "Json parse error: " << error.errorString();
+//        QMessageBox::critical(this, "Error", error.errorString());
+        return;
+    }
     QJsonObject message = doc.object();
+
+    // Reset the variable to zero
+    // so that we can read the following message
+    m_block_size = 0;
 
     QJsonObject feedback;
     if (message["type"] == "message") {
@@ -63,9 +98,9 @@ void ServerBack::slotReadyRead()
             // Here need to display a message indicating
             // that there is a new user online
 
-            Sockets[feedback["username"].toString()] = socket;
+            Sockets[feedback["username"].toString()] = m_socket;
         }
-        sendToClient(feedback, socket);
+        sendToClient(feedback, m_socket);
     }
     else if (message["type"] == "registration") {
         feedback = registration(message);
@@ -73,9 +108,9 @@ void ServerBack::slotReadyRead()
             // Here need to display a message indicating
             // that there is a new user online
 
-            Sockets[feedback["username"].toString()] = socket;
+            Sockets[feedback["username"].toString()] = m_socket;
         }
-        sendToClient(feedback, socket);
+        sendToClient(feedback, m_socket);
     }
     else
         // For users who want to break the system
@@ -84,31 +119,16 @@ void ServerBack::slotReadyRead()
 
 void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client)
 {
-    QJsonDocument doc(message);
-    QByteArray data = doc.toJson(QJsonDocument::Compact);
-    client->write(data);
+    QByteArray data = QJsonDocument(message).toJson(QJsonDocument::Compact);
+    QDataStream out(m_socket);
+    out.setVersion(QDataStream::Qt_5_15);
 
-    /*
-    QJsonDocument doc(message);
-    QByteArray data = doc.toJson(QJsonDocument::Compact);
+    out << quint16(data.size());
+    out.writeRawData(data.constData(), data.size());
 
-    qint64 bytesWritten = 0;
-    qint64 bytesTotal = data.size();
-
-    while (bytesWritten < bytesTotal) {
-        qint64 bytes = socket->write(data.mid(bytesWritten));
-        if (bytes == -1) {
-            qDebug() << "Error while sending data: " << socket->errorString();
-            return;
-        }
-
-        bytesWritten += bytes;
-        if (!socket->waitForBytesWritten()) {
-            qDebug() << "Error while sending data: " << socket->errorString();
-            return;
-        }
-    }
-    */
+    // Forcing all data to be sent at once
+    // to avoid multithreading problems when data accumulate in the buffer
+    client->flush();
 }
 
 QJsonObject ServerBack::registration(const QJsonObject &message)

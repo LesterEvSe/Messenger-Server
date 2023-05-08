@@ -13,7 +13,8 @@ class ServerBack : public QTcpServer
     Q_OBJECT
 
 private:
-    QSqlDatabase database;
+    quint16 m_block_size;
+    QSqlDatabase m_database;
     QSqlQuery m_query;
 
     // Here we store the username and its socket
@@ -29,7 +30,7 @@ private slots:
     void slotReadyRead();
 
 public:
-    QTcpSocket *socket;
+    QTcpSocket *m_socket;
     explicit ServerBack(QObject *parent = nullptr);
 };
 
