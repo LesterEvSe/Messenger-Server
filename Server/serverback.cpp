@@ -8,8 +8,9 @@
 #include <QMessageBox>
 #include <QDebug> // Need to delete later
 
-ServerBack::ServerBack(QObject *parent) :
+ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
+    gui(ui),
     m_block_size(0),
     m_database(QSqlDatabase::addDatabase("QSQLITE")),
     m_socket(nullptr)
@@ -30,6 +31,8 @@ ServerBack::ServerBack(QObject *parent) :
         qDebug() << "Start listening port 1326...";
     else
         qDebug() << "Error";
+
+    ui->show();
 }
 
 void ServerBack::incomingConnection(qintptr socketDescriptor)
@@ -41,8 +44,21 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
     m_socket->setSocketDescriptor(socketDescriptor);
     connect(m_socket, &QTcpSocket::readyRead, this, &ServerBack::slotReadyRead);
     connect(m_socket, &QTcpSocket::disconnected, this, [=](){
+        auto it = m_sockets.begin();
+        QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
+
+        for (; it != m_sockets.end(); ++it)
+            if (it.value() == curr_socket)
+                break;
+
+        if (it != m_sockets.end()) {
+            gui->offline_user(it.key());
+            m_sockets.erase(it);
+        }
+
+
         qDebug() << "disconnected" << socketDescriptor;
-        m_socket->deleteLater();
+        curr_socket->deleteLater();
     });
 
     qDebug() << "Client connected" << socketDescriptor;
@@ -109,33 +125,36 @@ void ServerBack::slotReadyRead()
 
     QJsonObject feedback;
     if (message["type"] == "message") {
+        if (message["message"].toString().isEmpty()) return;
         feedback = sendMessage(message);
-        sendToClient(feedback, Sockets[message["to"].toString()]);
+        sendToClient(feedback, m_socket);
+        // sendToClient(feedback, Sockets[message["to"].toString()]);
     }
     else if (message["type"] == "login") {
         feedback = login(message);
-        if (feedback["isCorrect"].toBool()) {
-            // Here need to display a message indicating
-            // that there is a new user online
-
-            Sockets[feedback["username"].toString()] = m_socket;
-        }
+        if (feedback["isCorrect"].toBool())
+            successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
     }
     else if (message["type"] == "registration") {
         feedback = registration(message);
-        if (feedback["isCorrect"].toBool()) {
-            // Here need to display a message indicating
-            // that there is a new user online
-
-            Sockets[feedback["username"].toString()] = m_socket;
-        }
+        if (feedback["isCorrect"].toBool())
+            successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
     }
     else
         // For users who want to break the system
         return;
 }
+
+// Here need to display a message indicating
+// that there is a new user online
+void ServerBack::successEntry(const QString& username) {
+    gui->online_user(username);
+    m_sockets[username] = m_socket;
+}
+
+
 
 QJsonObject ServerBack::registration(const QJsonObject &message)
 {
