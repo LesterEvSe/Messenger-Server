@@ -123,8 +123,20 @@ void ServerBack::slotReadyRead()
     if (message["type"] == "message") {
         if (message["message"].toString().isEmpty()) return;
         feedback = sendMessage(message);
-        sendToClient(feedback, m_socket);
-        // sendToClient(feedback, Sockets[message["to"].toString()]);
+
+        // If sender == recipient or recipient offline
+        if (message["from"] == message["to"] ||
+                m_sockets.find(message["to"].toString()) == m_sockets.end())
+            sendToClient(feedback, m_socket);
+
+        // Recepient offline
+        else {
+            sendToClient(feedback, m_socket);
+            sendToClient(feedback, m_sockets[message["to"].toString()]);
+        }
+
+        // Here DataBase record
+        // NEED TO IMPLEMENT
     }
     else if (message["type"] == "update online user") {
         updatingOnlineUsers(m_socket);
@@ -247,10 +259,10 @@ QJsonObject ServerBack::login(const QJsonObject &message)
 
 void ServerBack::updatingOnlineUsers(QTcpSocket *client) const
 {
-    QJsonArray arr;
     QJsonObject json;
     json["type"] = "update online user";
 
+    QJsonArray arr;
     for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
         arr.append(it.key());
 
