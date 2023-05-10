@@ -19,8 +19,7 @@ Server::~Server() {
     delete ui;
 }
 
-void Server::online_user(const QString &username)
-{
+void Server::online_user(const QString &username) {
     ui->onlineUsersListWidget->addItem(username);
 }
 

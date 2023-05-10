@@ -2,6 +2,7 @@
 
 #include <QJsonDocument>
 #include <QJsonParseError>
+#include <QJsonArray>
 #include <QByteArray>
 #include <QFileInfo>
 
@@ -55,19 +56,14 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
             gui->offline_user(it.key());
             m_sockets.erase(it);
         }
-
-
-        qDebug() << "disconnected" << socketDescriptor;
         curr_socket->deleteLater();
     });
-
-    qDebug() << "Client connected" << socketDescriptor;
 }
 
-void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client)
+void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) const
 {
     QByteArray data = QJsonDocument(message).toJson(QJsonDocument::Compact);
-    QDataStream out(m_socket);
+    QDataStream out(client);
 
     // To avoid errors, as it is constantly updated
     out.setVersion(QDataStream::Qt_5_15);
@@ -130,21 +126,23 @@ void ServerBack::slotReadyRead()
         sendToClient(feedback, m_socket);
         // sendToClient(feedback, Sockets[message["to"].toString()]);
     }
+    else if (message["type"] == "update online user") {
+        updatingOnlineUsers(m_socket);
+    }
     else if (message["type"] == "login") {
         feedback = login(message);
         if (feedback["isCorrect"].toBool())
             successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
+        updatingOnlineUsers(m_socket);
     }
     else if (message["type"] == "registration") {
         feedback = registration(message);
         if (feedback["isCorrect"].toBool())
             successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
+        updatingOnlineUsers(m_socket);
     }
-    else
-        // For users who want to break the system
-        return;
 }
 
 // Here need to display a message indicating
@@ -200,8 +198,12 @@ QJsonObject ServerBack::registration(const QJsonObject &message)
         return feedback;
     }
 
+    QJsonArray arr;
+    for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
+        arr.append(it.key());
 
     feedback["isCorrect"] = true;
+    feedback["feedback"]  = arr;
     return feedback;
 }
 
@@ -238,8 +240,22 @@ QJsonObject ServerBack::login(const QJsonObject &message)
         return feedback;
     }
 
+
     feedback["isCorrect"] = true;
     return feedback;
+}
+
+void ServerBack::updatingOnlineUsers(QTcpSocket *client) const
+{
+    QJsonArray arr;
+    QJsonObject json;
+    json["type"] = "update online user";
+
+    for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
+        arr.append(it.key());
+
+    json["user array"] = arr;
+    sendToClient(json, client);
 }
 
 // Need to implement

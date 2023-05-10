@@ -26,7 +26,8 @@ private:
     QHash<QString, QTcpSocket*> m_sockets;
     QTcpSocket *m_socket;
 
-    void sendToClient        (const QJsonObject& message, QTcpSocket *client);
+    void sendToClient        (const QJsonObject& message, QTcpSocket *client) const;
+    void updatingOnlineUsers (QTcpSocket *client) const;
 
     void successEntry        (const QString& username);
     QJsonObject registration (const QJsonObject& message);
