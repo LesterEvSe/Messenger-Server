@@ -146,14 +146,12 @@ void ServerBack::slotReadyRead()
         if (feedback["isCorrect"].toBool())
             successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
-        updatingOnlineUsers(m_socket);
     }
     else if (message["type"] == "registration") {
         feedback = registration(message);
         if (feedback["isCorrect"].toBool())
             successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
-        updatingOnlineUsers(m_socket);
     }
 }
 
@@ -232,6 +230,12 @@ QJsonObject ServerBack::login(const QJsonObject &message)
     if (message["password"].toString().length() < 4) {
         feedback["isCorrect"] = false;
         feedback["feedback"] = "The password must contain at least 4 characters";
+        return feedback;
+    }
+
+    if (m_sockets.find(message["username"].toString()) != m_sockets.end()) {
+        feedback["isCorrect"] = false;
+        feedback["feedback"]  = "User is online now";
         return feedback;
     }
 
