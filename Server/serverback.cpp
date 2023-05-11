@@ -124,16 +124,20 @@ void ServerBack::slotReadyRead()
         if (message["message"].toString().isEmpty()) return;
         feedback = sendMessage(message);
 
+        /// The acknowledgment pattern has to be applied here
+        /// to confirm that the message is written to the DB,
+        /// so we have to send the JSON after all. DO IT!!!
+
         // If sender == recipient or recipient offline
         if (message["from"] == message["to"] ||
-                m_sockets.find(message["to"].toString()) == m_sockets.end())
-            sendToClient(feedback, m_socket);
+                m_sockets.find(message["to"].toString()) == m_sockets.end());
+        // ; is plug for future
+            /// Here acknowledgment
 
-        // Recepient offline
-        else {
-            sendToClient(feedback, m_socket);
+        // Recepient online
+        else
+            /// and here acknowledgment
             sendToClient(feedback, m_sockets[message["to"].toString()]);
-        }
 
         // Here DataBase record
         // NEED TO IMPLEMENT
