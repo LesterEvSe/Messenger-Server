@@ -1,0 +1,42 @@
+Client Json:
+
+№1
+type 	  = registration
+username  = ...
+password  = ...
+
+№2
+type	  = login
+username  = ...
+password  = ...
+
+№3
+type	  = message
+from	  = m_username
+to	  = ...
+message   = some text...
+
+№4
+type	  = update online user
+
+
+
+
+
+Server Json:
+
+№1 (shared for registration and login)
+type	  = registration/login
+isCorrect = true/false
+feedback  = Error message
+
+if isCorrect = true, there is no feedback field
+
+№2
+type		= update online user
+user array	= Store the users that are currently online (QJsonArray)
+
+№3
+type	  = message
+from	  = from who
+message	  = ...

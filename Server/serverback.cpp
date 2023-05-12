@@ -183,6 +183,18 @@ QJsonObject ServerBack::registration(const QJsonObject &message)
         return feedback;
     }
 
+    if (message["username"].toString().length() > 64) {
+        feedback["isCorrect"] = false;
+        feedback["feedback"] = "Username is too long";
+        return feedback;
+    }
+
+    if (message["password"].toString().length() > 64) {
+        feedback["isCorrect"] = false;
+        feedback["feedback"] = "Password is too long";
+        return feedback;
+    }
+
 
     // The following validations for the DataBase
     m_query.prepare("SELECT password FROM users WHERE username = :username");
