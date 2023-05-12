@@ -2,15 +2,19 @@
 #define SERVERBACK_HPP
 
 #include "server.hpp"
+#include "database.hpp"
 
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QtSql>
 
 #include <QHash>
 #include <QJsonObject>
 
+#include <memory>
+
 class Server;
+class Database;
+
 class ServerBack : public QTcpServer
 {
     Q_OBJECT
@@ -19,8 +23,8 @@ private:
     Server *gui;
     qint64 m_block_size;
 
-    QSqlDatabase m_database;
-    QSqlQuery m_query;
+    // Working with the Database will be in a separate class
+    std::unique_ptr<Database> m_database;
 
     // Here we store the username and its socket
     QHash<QString, QTcpSocket*> m_sockets;
@@ -39,6 +43,18 @@ private slots:
     void slotReadyRead();
 
 public:
+    /// WHY WE DO NOT NEED A DESTRUCTOR
+    /*
+       Do not delete 'gui', because it is created on the stack
+       A pointer is passed here
+
+       m_sockets and m_socket delete by itself,
+       because the QTcpServer class destructor will be called,
+       which will clean up all the child
+
+       m_database is unique_ptr
+    */
+
     explicit ServerBack(Server *ui, QObject *parent = nullptr);
 };
 

@@ -13,20 +13,9 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
     gui(ui),
     m_block_size(0),
-    m_database(QSqlDatabase::addDatabase("QSQLITE")),
     m_socket(nullptr)
 {
-    QString DBName = "../messenger.sqlite";
-    m_database.setDatabaseName(DBName);
-
-    if (!m_database.open()) {
-        qDebug() << "Failed to connect to database: " << m_database.lastError();
-    }
-
-    QSqlQuery query("SELECT name FROM sqlite_master WHERE type='table' AND name='users';");
-    if (!query.next() && !query.exec("CREATE TABLE users (username TEXT, password TEXT)")) {
-        qDebug() << "Failed to create table: " << query.lastError();
-    }
+    m_database = std::make_unique<Database>();
 
     if (listen(QHostAddress::Any, 1326))
         qDebug() << "Start listening port 1326...";
@@ -35,6 +24,7 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
 
     ui->show();
 }
+
 
 void ServerBack::incomingConnection(qintptr socketDescriptor)
 {
@@ -195,34 +185,8 @@ QJsonObject ServerBack::registration(const QJsonObject &message)
         return feedback;
     }
 
-
-    // The following validations for the DataBase
-    m_query.prepare("SELECT password FROM users WHERE username = :username");
-    m_query.bindValue(":username", message["username"].toString());
-
-    // Problem with query
-    if (!m_query.exec()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Data access error";
+    if (!m_database.get()->registrationValidation(message, feedback))
         return feedback;
-    }
-
-    if (m_query.next()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "This username is already taken";
-        return feedback;
-    }
-
-    m_query.prepare("INSERT INTO users (username, password) values (:username, :password);");
-    m_query.bindValue(":username", message["username"].toString());
-    m_query.bindValue(":password", message["password"].toString());
-
-    // Problem with query
-    if (!m_query.exec()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Data access error";
-        return feedback;
-    }
 
     QJsonArray arr;
     for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
@@ -255,23 +219,8 @@ QJsonObject ServerBack::login(const QJsonObject &message)
         return feedback;
     }
 
-    // The following validations for the DataBase
-    m_query.prepare("SELECT password FROM users WHERE username = :username");
-    m_query.bindValue(":username", message["username"].toString());
-
-    // Problem with DataBase
-    if (!m_query.exec()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Data access error";
+    if (!m_database.get()->loginValidation(message, feedback))
         return feedback;
-    }
-
-    if (!m_query.next() || message["password"].toString() != m_query.value(0).toString()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Incorrect nickname or password";
-        return feedback;
-    }
-
 
     feedback["isCorrect"] = true;
     return feedback;
