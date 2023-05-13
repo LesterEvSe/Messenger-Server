@@ -4,10 +4,9 @@
 #include <QJsonParseError>
 #include <QJsonArray>
 #include <QByteArray>
-#include <QFileInfo>
+#include <QtSql/QSqlError>
 
 #include <QMessageBox>
-#include <QDebug> // Need to delete later
 
 ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
@@ -98,17 +97,25 @@ void ServerBack::slotReadyRead()
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 
-    if (error.error != QJsonParseError::NoError) {
-        qDebug() << "Json parse error: " << error.errorString();
-//        QMessageBox::critical(this, "Error", error.errorString());
-        return;
-    }
+    if (error.error != QJsonParseError::NoError)
+        gui->showError("Json parse error: " + error.errorString());
     QJsonObject message = doc.object();
 
     // Reset the variable to zero
     // so that we can read the following message
     m_block_size = 0;
-    determineMessage(message);
+    try {
+        determineMessage(message);
+    }
+    catch(const QSqlError& error) {
+        gui->showError("Caught SQL error in func " + error.text());
+    }
+    catch (const std::exception& error) {
+        gui->showError("Caught exception: " + QString(error.what()));
+    }
+    catch(...) {
+        gui->showError("Caught unknown exception");
+    }
 }
 
 void ServerBack::determineMessage(const QJsonObject& message)

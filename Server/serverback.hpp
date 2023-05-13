@@ -9,6 +9,7 @@
 
 #include <QHash>
 #include <QJsonObject>
+#include <QtSql>
 
 #include <memory>
 

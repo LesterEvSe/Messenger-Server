@@ -2,6 +2,7 @@
 #include "ui_server.h"
 
 #include <QScreen>
+#include <QMessageBox>
 
 Server::Server(QWidget *parent) :
     QWidget(parent),
@@ -20,6 +21,12 @@ Server::Server(QWidget *parent) :
 Server::~Server() {
     delete ui;
 }
+
+void Server::showError(const QString &error) {
+    QMessageBox::critical(this, "Error", error);
+    exit(1);
+}
+
 
 void Server::online_user(const QString &username) {
     ui->onlineUsersListWidget->addItem(username);

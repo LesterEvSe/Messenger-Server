@@ -39,12 +39,8 @@ bool Database::loginValidation(const QJsonObject& message, QJsonObject& feedback
     query.prepare("SELECT password FROM users WHERE username = :username");
     query.bindValue(":username", message["username"].toString());
 
-    // Problem with DataBase
-    if (!query.exec()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Data access error";
-        return false;
-    }
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(), QString("'login validation'; "));
 
     if (!query.next() || message["password"].toString() != query.value(0).toString()) {
         feedback["isCorrect"] = false;
@@ -63,11 +59,9 @@ bool Database::registrationValidation(const QJsonObject& message, QJsonObject& f
     query.bindValue(":username", message["username"].toString());
 
     // Problem with query
-    if (!query.exec()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Data access error";
-        return false;
-    }
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(),
+                        QString("'registration validation' error 1; "));
 
     if (query.next()) {
         feedback["isCorrect"] = false;
@@ -80,11 +74,9 @@ bool Database::registrationValidation(const QJsonObject& message, QJsonObject& f
     query.bindValue(":password", message["password"].toString());
 
     // Problem with query
-    if (!query.exec()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Data access error";
-        return false;
-    }
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(),
+                        QString("'registration validation' error 2; "));
 
     return true;
 }
@@ -99,10 +91,9 @@ bool Database::addMessage(const QJsonObject &message)
     query.bindValue(":message", message["message"].toString());
     query.bindValue(":data_time", QDateTime::currentDateTime());
 
-    if (!query.exec()) {
-        qDebug() << "Failed to insert message: " << query.lastError().text();
-        return false;
-    }
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(),
+                        QString("'add message' failed to insert; "));
     return true;
 }
 
@@ -122,22 +113,12 @@ QJsonArray Database::getChats(const QString &user) const
                   "SELECT DISTINCT sender from message WHERE recipient = :user");
     query.bindValue(":user", user);
 
-    if (!query.exec()) {
-        qDebug() << "Failed to find recipients. Stop what? " << query.lastError().text();
-        return QJsonArray();
-    }
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(), QString("'get chats'; "));
 
     QJsonArray arr;
     while (query.next())
         arr.append(query.value(0).toString());
     return arr;
 }
-
-
-
-
-
-
-
-
 
