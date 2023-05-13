@@ -67,7 +67,7 @@ void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) co
 
     // Forcing all data to be sent at once
     // to avoid multithreading problems when data accumulate in the buffer
-    client->flush();
+//    client->flush();
 }
 
 void ServerBack::slotReadyRead()
@@ -116,13 +116,6 @@ void ServerBack::determineMessage(const QJsonObject& message)
     QJsonObject feedback;
     if (message["type"] == "message" && authorizedAccess(message["from"].toString())) {
         if (message["message"].toString().isEmpty()) return;
-
-        // A non-existing user
-        if (m_sockets.find(message["from"].toString()) == m_sockets.end()) return;
-
-        // User logged in illegally, so the socket in memory for him is different
-        if (m_sockets[message["from"].toString()] != m_socket) return;
-
         feedback = sendMessage(message);
 
         /// The acknowledgment pattern has to be applied here
@@ -146,6 +139,13 @@ void ServerBack::determineMessage(const QJsonObject& message)
              authorizedAccess(message["username"].toString()))
         updatingOnlineUsers(m_socket);
 
+    else if (message["type"] == "download chats" &&
+             authorizedAccess(message["username"].toString())) {
+        feedback["type"] = message["type"];
+        feedback["array of users"] = m_database->getChats(message["username"].toString());
+        sendToClient(feedback, m_socket);
+    }
+
     else if (message["type"] == "login") {
         feedback = login(message);
         if (feedback["isCorrect"].toBool())
@@ -163,7 +163,10 @@ void ServerBack::determineMessage(const QJsonObject& message)
 // If such a user is not on the network or his socket is different,
 // then it is unauthorized access
 bool ServerBack::authorizedAccess(const QString& username) const {
+    // A user non-exist
     if (m_sockets.find(username) == m_sockets.end()) return false;
+
+    // User logged in illegally, so the socket in memory for him is different
     if (m_sockets[username] != m_socket) return false;
     return true;
 }

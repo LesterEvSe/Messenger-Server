@@ -14,7 +14,12 @@ to	  	  = ...
 message   = some text...
 
 // Different types of requests
+// username is needed to check the username for authorization
 type	  = update online users
+username  = ...
+
+type	  = download chats
+username  = ...
 
 
 
@@ -30,6 +35,9 @@ feedback  = Error message
 
 type			= update online users
 array of users	= Store the users that are currently online (QJsonArray)
+
+type			= download chats
+array of users  = All of the user's chats
 
 type	  = message
 from	  = from who
