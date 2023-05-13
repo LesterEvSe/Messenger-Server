@@ -38,6 +38,9 @@ private:
     QJsonObject login        (const QJsonObject& message);
     QJsonObject sendMessage  (const QJsonObject& message);
 
+    // Full verification of unauthorized access
+    bool authorizedAccess    (const QString& username) const;
+
     // Must be called after slotReadyRead
     void determineMessage    (const QJsonObject& message);
 

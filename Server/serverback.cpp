@@ -114,8 +114,15 @@ void ServerBack::slotReadyRead()
 void ServerBack::determineMessage(const QJsonObject& message)
 {
     QJsonObject feedback;
-    if (message["type"] == "message") {
+    if (message["type"] == "message" && authorizedAccess(message["from"].toString())) {
         if (message["message"].toString().isEmpty()) return;
+
+        // A non-existing user
+        if (m_sockets.find(message["from"].toString()) == m_sockets.end()) return;
+
+        // User logged in illegally, so the socket in memory for him is different
+        if (m_sockets[message["from"].toString()] != m_socket) return;
+
         feedback = sendMessage(message);
 
         /// The acknowledgment pattern has to be applied here
@@ -135,7 +142,8 @@ void ServerBack::determineMessage(const QJsonObject& message)
 
         m_database.get()->addMessage(message);
     }
-    else if (message["type"] == "update online users")
+    else if (message["type"] == "update online users" &&
+             authorizedAccess(message["username"].toString()))
         updatingOnlineUsers(m_socket);
 
     else if (message["type"] == "login") {
@@ -150,6 +158,14 @@ void ServerBack::determineMessage(const QJsonObject& message)
             successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
     }
+}
+
+// If such a user is not on the network or his socket is different,
+// then it is unauthorized access
+bool ServerBack::authorizedAccess(const QString& username) const {
+    if (m_sockets.find(username) == m_sockets.end()) return false;
+    if (m_sockets[username] != m_socket) return false;
+    return true;
 }
 
 // Here need to display a message indicating
@@ -242,7 +258,6 @@ void ServerBack::updatingOnlineUsers(QTcpSocket *client) const
     sendToClient(json, client);
 }
 
-// Need to implement
 QJsonObject ServerBack::sendMessage(const QJsonObject &message)
 {
     QJsonObject feedback;
