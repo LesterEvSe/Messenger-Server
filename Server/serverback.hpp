@@ -38,6 +38,9 @@ private:
     QJsonObject login        (const QJsonObject& message);
     QJsonObject sendMessage  (const QJsonObject& message);
 
+    // Must be called after slotReadyRead
+    void determineMessage    (const QJsonObject& message);
+
 private slots:
     void incomingConnection(qintptr socketDescriptor);
     void slotReadyRead();
@@ -54,7 +57,6 @@ public:
 
        m_database is unique_ptr
     */
-
     explicit ServerBack(Server *ui, QObject *parent = nullptr);
 };
 

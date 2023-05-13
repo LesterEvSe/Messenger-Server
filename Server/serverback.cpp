@@ -108,7 +108,11 @@ void ServerBack::slotReadyRead()
     // Reset the variable to zero
     // so that we can read the following message
     m_block_size = 0;
+    determineMessage(message);
+}
 
+void ServerBack::determineMessage(const QJsonObject& message)
+{
     QJsonObject feedback;
     if (message["type"] == "message") {
         if (message["message"].toString().isEmpty()) return;
