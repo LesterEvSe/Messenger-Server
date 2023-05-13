@@ -1,23 +1,20 @@
 Client Json:
 
-№1
 type 	  = registration
 username  = ...
 password  = ...
 
-№2
 type	  = login
 username  = ...
 password  = ...
 
-№3
 type	  = message
 from	  = m_username
-to	  = ...
+to	  	  = ...
 message   = some text...
 
-№4
-type	  = update online user
+// Different types of requests
+type	  = update online users
 
 
 
@@ -25,18 +22,15 @@ type	  = update online user
 
 Server Json:
 
-№1 (shared for registration and login)
+// Shared for registration and login.
+// If isCorrect = true, there is no feedback field
 type	  = registration/login
 isCorrect = true/false
 feedback  = Error message
 
-if isCorrect = true, there is no feedback field
+type			= update online users
+array of users	= Store the users that are currently online (QJsonArray)
 
-№2
-type		= update online user
-user array	= Store the users that are currently online (QJsonArray)
-
-№3
 type	  = message
 from	  = from who
 message	  = ...

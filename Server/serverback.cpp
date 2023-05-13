@@ -131,9 +131,9 @@ void ServerBack::slotReadyRead()
 
         m_database.get()->addMessage(message);
     }
-    else if (message["type"] == "update online user") {
+    else if (message["type"] == "update online users")
         updatingOnlineUsers(m_socket);
-    }
+
     else if (message["type"] == "login") {
         feedback = login(message);
         if (feedback["isCorrect"].toBool())
@@ -228,13 +228,13 @@ QJsonObject ServerBack::login(const QJsonObject &message)
 void ServerBack::updatingOnlineUsers(QTcpSocket *client) const
 {
     QJsonObject json;
-    json["type"] = "update online user";
+    json["type"] = "update online users";
 
     QJsonArray arr;
     for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
         arr.append(it.key());
 
-    json["user array"] = arr;
+    json["array of users"] = arr;
     sendToClient(json, client);
 }
 

@@ -22,7 +22,7 @@ Database::Database() :
         qDebug() << "Failed to create users table: " << query.lastError().text();
     }
 
-    QSqlQuery query2("SELECT name FROM sqlite_master WHERE type='table' AND name='data';");
+    QSqlQuery query2("SELECT name FROM sqlite_master WHERE type='table' AND name='message';");
     if (!query2.next() &&
             !query2.exec("CREATE TABLE message ("
                         "message_id    INTEGER PRIMARY KEY AUTOINCREMENT, "
