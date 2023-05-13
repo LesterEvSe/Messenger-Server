@@ -4,6 +4,9 @@
 #include "serverback.hpp"
 
 #include <QWidget>
+#include <QHash>
+#include <QTextBrowser>
+#include <QListWidgetItem>
 
 class ServerBack;
 
@@ -17,12 +20,19 @@ class Server : public QWidget
     friend class ServerBack;
 private:
     Ui::Server *ui;
+
+    // The data are stored as follows: the pair username1, username2,
+    // their chat window QTextBrowser, and the index in the stackWidget 'int'
+    QHash<QPair<QString, QString>, std::pair<QTextBrowser*, int>> m_chats;
+
     void online_user    (const QString& username);
     void offline_user   (const QString& username);
 
 public:
     Server(QWidget *parent = nullptr);
     ~Server();
+private slots:
+    void on_chatsListWidget_itemClicked(QListWidgetItem *item);
 };
 
 #endif // SERVER_HPP

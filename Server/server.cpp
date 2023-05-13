@@ -9,6 +9,8 @@ Server::Server(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("Server");
+    ui->findUserLineEdit->setPlaceholderText("Find user...");
+
     QRect screenGeometry = QApplication::primaryScreen()->geometry();
     int w = screenGeometry.width();
     int h = screenGeometry.height();
@@ -33,3 +35,10 @@ void Server::offline_user(const QString &username)
         }
     }
 }
+
+// Need to implement later
+void Server::on_chatsListWidget_itemClicked(QListWidgetItem *item)
+{
+
+}
+

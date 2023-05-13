@@ -129,8 +129,7 @@ void ServerBack::slotReadyRead()
             /// and here acknowledgment
             sendToClient(feedback, m_sockets[message["to"].toString()]);
 
-        // Here DataBase record
-        // NEED TO IMPLEMENT
+        m_database.get()->addMessage(message);
     }
     else if (message["type"] == "update online user") {
         updatingOnlineUsers(m_socket);

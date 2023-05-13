@@ -9,12 +9,16 @@ class Database
 {
     friend class ServerBack;
 private:
-    QSqlDatabase m_log_reg;
-    QSqlDatabase m_messanges; // need to initialize
-    QSqlQuery m_query;
+    QSqlDatabase m_messenger;
 
     bool loginValidation        (const QJsonObject& message, QJsonObject& feedback);
     bool registrationValidation (const QJsonObject& message, QJsonObject& feedback);
+
+    bool addMessage             (const QJsonObject& message);
+    QJsonObject getMessages     (const QString& user1, const QString& user2);
+    QJsonArray getChats         (const QString& user) const;
+
+
 
 public:
     Database();
