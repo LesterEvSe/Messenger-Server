@@ -17,7 +17,7 @@ public:
     bool registrationValidation (const QJsonObject& message, QJsonObject& feedback);
 
     bool addMessage             (const QJsonObject& message);
-    QJsonObject getMessages     (const QString& user1, const QString& user2);
+    QJsonObject getMessages     (const QString& user1, const QString& user2) const;
     QJsonArray getChats         (const QString& user) const;
 };
 

@@ -142,6 +142,14 @@ void ServerBack::determineMessage(const QJsonObject& message)
 
         m_database.get()->addMessage(message);
     }
+    else if (message["type"] == "download correspondence" &&
+             authorizedAccess(message["username"].toString())) {
+        feedback = m_database.get()->getMessages(
+                    message["username"].toString(), message["with"].toString());
+        feedback["type"] = message["type"];
+        sendToClient(feedback, m_socket);
+    }
+
     else if (message["type"] == "update online users" &&
              authorizedAccess(message["username"].toString()))
         updatingOnlineUsers(m_socket);

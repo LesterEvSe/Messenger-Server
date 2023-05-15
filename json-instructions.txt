@@ -21,6 +21,10 @@ username  = ...
 type	  = download chats
 username  = ...
 
+type	  = download correspondence
+username  = ...
+with	  = ...
+
 
 
 
@@ -38,6 +42,11 @@ array of users	= Store the users that are currently online (QJsonArray)
 
 type			= download chats
 array of users  = All of the user's chats
+
+type 			= download correspondence
+chat array		= ... // Here are messages from both users
+our messages_id	= ... // Here are our message numbers.
+	Counting down from 0. The rest are from another user
 
 type	  = message
 from	  = from who

@@ -97,10 +97,33 @@ bool Database::addMessage(const QJsonObject &message)
     return true;
 }
 
-// Need to implement
-QJsonObject Database::getMessages(const QString& user1, const QString& user2)
+// Don't work if user1 == user2
+QJsonObject Database::getMessages(const QString& user1, const QString& user2) const
 {
-    return QJsonObject();
+    QSqlQuery query;
+    query.prepare("SELECT sender, message FROM message "
+                  "WHERE (sender = :user1 AND recipient = :user2) OR "
+                  "      (sender = :user2 AND recipient = :user1) "
+                  "ORDER BY message_id ASC");
+    query.bindValue(":user1", user1);
+    query.bindValue(":user2", user2);
+
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(), QString("'get messages'; "));
+
+    QJsonObject json;
+    QJsonArray  chat_array;
+    QJsonArray  our_messages_id;
+
+    for (int coun = 0; query.next(); ++coun) {
+        if (query.value(0).toString() == user1)
+            our_messages_id.append(coun);
+        chat_array.append(query.value(1).toString());
+    }
+
+    json["chat array"] = chat_array;
+    json["our messages_id"] = our_messages_id;
+    return json;
 }
 
 QJsonArray Database::getChats(const QString &user) const
