@@ -81,6 +81,22 @@ bool Database::registrationValidation(const QJsonObject& message, QJsonObject& f
     return true;
 }
 
+
+
+bool Database::findUser(const QString &user) const
+{
+    QSqlQuery query;
+    query.prepare("SELECT username FROM users WHERE username = :user");
+    query.bindValue(":user", user);
+
+    if (!query.exec())
+        throw QSqlError(query.lastError().text(),
+                        QString("'find user' search error; "));
+
+    // If it exists it returns true, otherwise false
+    return query.next();
+}
+
 bool Database::addMessage(const QJsonObject &message)
 {
     QSqlQuery query;

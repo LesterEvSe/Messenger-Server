@@ -14,14 +14,16 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     m_block_size(0),
     m_socket(nullptr)
 {
-    m_database = std::make_unique<Database>();
+    // Now two owners of the same resource
+    // As the Server class is created before the ServerBack
+    m_database = gui->m_database;
 
     if (listen(QHostAddress::Any, 1326))
         qDebug() << "Start listening port 1326...";
     else
-        qDebug() << "Error";
+        gui->showError("Port listening error");
 
-    ui->show();
+    gui->show();
 }
 
 

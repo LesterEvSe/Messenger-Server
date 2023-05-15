@@ -25,7 +25,7 @@ private:
     qint64 m_block_size;
 
     // Working with the Database will be in a separate class
-    std::unique_ptr<Database> m_database;
+    std::shared_ptr<Database> m_database;
 
     // Here we store the username and its socket
     QHash<QString, QTcpSocket*> m_sockets;
