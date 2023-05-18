@@ -24,7 +24,7 @@ Server::~Server() {
     delete ui;
 }
 
-void Server::showError(const QString &error) {
+void Server::showErrorAndExit(const QString &error) {
     QMessageBox::critical(this, "Error", error);
     exit(1);
 }

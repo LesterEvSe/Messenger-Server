@@ -39,7 +39,7 @@ private:
     // their chat window QTextBrowser, and the index in the stackWidget 'int'
     QHash<QPair<QString, QString>, std::pair<QTextBrowser*, int>> m_chats;
 
-    void showError      (const QString& error);
+    void showErrorAndExit      (const QString& error);
     void online_user    (const QString& username);
     void offline_user   (const QString& username);
 

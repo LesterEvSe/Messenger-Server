@@ -3,6 +3,7 @@
 
 #include "server.hpp"
 #include "database.hpp"
+#include "encryption.hpp"
 
 #include <QTcpServer>
 #include <QTcpSocket>
@@ -27,9 +28,26 @@ private:
     // Working with the Database will be in a separate class
     std::shared_ptr<Database> m_database;
 
-    // Here we store the username and its socket
-    QHash<QString, QTcpSocket*> m_sockets;
+    // Here we store the username and QPair
+    /*
+       We also need to store messages on the server.
+       That is, the server will act as client and encode/decode each message.
+       To avoid bugs like: requested key, saved message,
+       another client made to CHANGE this GLOBAL QJsonObject m_message...
+       Now each client (key QString in QHash) has its own message buffer
+       in addition to the QTcpSocket, which acts as a bridge
+    */
+    /*
+       Why shared_ptr instead of unique_ptr?
+       Because when we take a value or iterate, ite temporarily copies the object
+       so we can do something with it later.
+       For unique_ptr this unacceptable, so the solution is shared_ptr
+    */
+    QHash<QString, QPair<QTcpSocket*, std::shared_ptr<QJsonObject>>> m_sockets;
     QTcpSocket *m_socket;
+
+    Encryption *m_encryption;
+    mutable QJsonObject m_message;
 
     void sendToClient        (const QJsonObject& message, QTcpSocket *client) const;
     void updatingOnlineUsers (QTcpSocket *client) const;
