@@ -1,7 +1,7 @@
 #include "encryption.hpp"
+
 #include <chrono> // for more accuracy in createPrime function
-#include <QJsonArray>
-#include <QJsonDocument>
+#include <memory>
 #include <string>
 
 Encryption::Encryption()
@@ -82,7 +82,7 @@ mpz_class Encryption::createPrime()
 }
 
 // encrypt, if true, otherwise decode
-QByteArray Encryption::encode_decode_block_bytes(const QByteArray& bytes, const QByteArray& key, bool encode) const
+QByteArray Encryption::encode_decode_block_bytes(const QByteArray& bytes, const QByteArray& cipher_key, bool encode) const
 {
     const unsigned char* data = reinterpret_cast<const unsigned char*>(bytes.data());
     size_t num_bytes = static_cast<size_t>(bytes.size());
@@ -97,7 +97,7 @@ QByteArray Encryption::encode_decode_block_bytes(const QByteArray& bytes, const 
     // res = num ^ e % n
     if (encode) {
         mpz_class mod;
-        mod.set_str(key.constData(), BASE);
+        mod.set_str(cipher_key.constData(), BASE);
 
         mpz_powm(res.get_mpz_t(), num.get_mpz_t(), e.get_mpz_t(), mod.get_mpz_t());
     }
@@ -127,8 +127,8 @@ QByteArray Encryption::encode(const QByteArray& bytes, const QByteArray& key) co
 
 QByteArray Encryption::decode(const QByteArray& bytes) const
 {
-    // We use OUR key for decoding, so we do not need the QByteArray parameter
-    // We pass in an empty.
+    // Use private key for decoding, so we do not need the QByteArray parameter
+    // Pass in it an empty.
     QByteArray plug;
 
     QByteArray answer;

@@ -2,8 +2,6 @@
 #define ENCRYPTION_HPP
 
 #include <gmpxx.h> // gmp.h for C
-#include <random>
-#include <QString>
 #include <QByteArray>
 
 // Singleton class
@@ -33,16 +31,16 @@ private:
     mpz_class e;
 
     static mpz_class createPrime();
-    QByteArray encode_decode_block_bytes(const QByteArray& bytes, const QByteArray& key, bool encode) const;
+    QByteArray encode_decode_block_bytes(const QByteArray& bytes, const QByteArray& cipher_key, bool encode) const;
 
-    Encryption(const Encryption&)   = delete;
-    Encryption(Encryption&&)        = delete;
+    Encryption(const Encryption&)               = delete;
+    Encryption(Encryption&&)                    = delete;
     Encryption& operator= (const Encryption&)   = delete;
     Encryption& operator= (Encryption&&)        = delete;
     Encryption();
 
 public:
-    static Encryption* get() {
+    static Encryption* get_instance() {
         static Encryption rsa = Encryption();
         return &rsa;
     }

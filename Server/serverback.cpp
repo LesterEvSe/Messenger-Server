@@ -142,11 +142,11 @@ void ServerBack::determineMessage(const QJsonObject& message)
             /// and here acknowledgment
             sendToClient(feedback, m_sockets[message["to"].toString()]);
 
-        m_database.get()->addMessage(message);
+        m_database->addMessage(message);
     }
     else if (message["type"] == "download correspondence" &&
              authorizedAccess(message["username"].toString())) {
-        feedback = m_database.get()->getMessages(
+        feedback = m_database->getMessages(
                     message["username"].toString(), message["with"].toString());
         feedback["type"] = message["type"];
         sendToClient(feedback, m_socket);
@@ -224,7 +224,7 @@ QJsonObject ServerBack::registration(const QJsonObject &message)
         return feedback;
     }
 
-    if (!m_database.get()->registrationValidation(message, feedback))
+    if (!m_database->registrationValidation(message, feedback))
         return feedback;
 
     QJsonArray arr;
@@ -258,7 +258,7 @@ QJsonObject ServerBack::login(const QJsonObject &message)
         return feedback;
     }
 
-    if (!m_database.get()->loginValidation(message, feedback))
+    if (!m_database->loginValidation(message, feedback))
         return feedback;
 
     feedback["isCorrect"] = true;
