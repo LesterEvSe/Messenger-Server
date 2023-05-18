@@ -1,6 +1,6 @@
-QT       += core gui network sql
-
-LIBS += -L/usr/lib/python3.10 -lsqlite3
+QT          += core gui network sql
+LIBS        += -lgmp
+INCLUDEPATH += /usr/include
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,12 +12,14 @@ CONFIG += c++17
 
 SOURCES += \
     database.cpp \
+    encryption.cpp \
     main.cpp \
     server.cpp \
     serverback.cpp
 
 HEADERS += \
     database.hpp \
+    encryption.hpp \
     server.hpp \
     serverback.hpp
 

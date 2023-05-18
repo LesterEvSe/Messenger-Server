@@ -1,0 +1,30 @@
+1. Start by generating 2 large prime numbers. p and q.
+Note: For messenger we need 2048+ bit numbers which is ~617 characters in 10 base system
+
+2. Calculate the modulus n = p * q
+3. Calculate the value of the Euler function of the number n
+  fi(n) = (p - 1) * (q - 1)
+  
+4. Choose an integer e (1 < e < fi(n)) mutually prime to fi(n)
+  gcd(e, fi(n)) = 1. These are, for example, prime of Fermat's numbers: 17, 257 or 65'537.
+  Too small values (like 3), can weaken the protection.
+  In the program is selected 'e' equal to 65'537, recommended by the standard
+
+5. Calculate d, multiplicatively inverse to the number 'e' modulo
+   d * e % fi(n) = 1
+   d = (e^-1) % fi(n)
+   
+6. pair (e, n) is published as RSA public key
+7. pair (d, n) is RSA private key
+
+
+// encode
+There is a line "max". We encrypt each character in this way
+Here e = 17, d = 53 n = 77
+'m' = 109^e % n = 10 // 109 - number in ASCII or other encoding
+'a' = 97^e % n = 51
+...
+
+// decode
+'m' = 10^d % n // 10 encoded character. d is our private key
+...
