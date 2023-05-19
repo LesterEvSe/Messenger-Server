@@ -10,8 +10,7 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
     gui(ui),
     m_block_size(0),
-    m_encryption(Encryption::get_instance()),
-    m_socket(nullptr)
+    m_encryption(Encryption::get_instance())
 {
     // Now two owners of the same resource
     // As the Server class is created before the ServerBack
@@ -28,13 +27,14 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
 
 void ServerBack::incomingConnection(qintptr socketDescriptor)
 {
-    m_socket = new QTcpSocket(this);
+    QTcpSocket *socket = new QTcpSocket(this);
+    m_messages[socket] = nullptr;
 
     // The descriptor is a positive number that identifies
     // the input/output stream
-    m_socket->setSocketDescriptor(socketDescriptor);
-    connect(m_socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
-    connect(m_socket, &QTcpSocket::disconnected, this, [=](){
+    socket->setSocketDescriptor(socketDescriptor);
+    connect(socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
+    connect(socket, &QTcpSocket::disconnected, this, [=](){
         auto it = m_sockets.begin();
         QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
 
@@ -48,6 +48,29 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
         }
         curr_socket->deleteLater();
     });
+
+
+    // OLD, WORKING CODE
+//    m_socket = new QTcpSocket(this);
+
+    // The descriptor is a positive number that identifies
+    // the input/output stream
+//    m_socket->setSocketDescriptor(socketDescriptor);
+//    connect(m_socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
+//    connect(m_socket, &QTcpSocket::disconnected, this, [=](){
+//        auto it = m_sockets.begin();
+//        QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
+
+//        for (; it != m_sockets.end(); ++it)
+//            if (it.value() == curr_socket)
+//                break;
+
+//        if (it != m_sockets.end()) {
+//            gui->offline_user(it.key());
+//            m_sockets.erase(it);
+//        }
+//        curr_socket->deleteLater();
+//    });
 }
 
 void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) const
@@ -97,27 +120,50 @@ void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) co
 
 void ServerBack::slotReadyRead()
 {
-    m_socket = qobject_cast<QTcpSocket*>(sender());
+    QTcpSocket *socket = qobject_cast<QTcpSocket*>(sender());
 
     // First of all we read the size of the message to be transmitted
-    QDataStream in(m_socket);
+    QDataStream in(socket);
     in.setVersion(QDataStream::Qt_5_15);
     if (in.status() != QDataStream::Ok)
         gui->showErrorAndExit("DataStream error");
 
     if (m_block_size == 0) {
-        if (m_socket->bytesAvailable() < static_cast<qint64>(sizeof(m_block_size)))
+        if (socket->bytesAvailable() < static_cast<qint64>(sizeof(m_block_size)))
             return;
         in >> m_block_size;
     }
 
     // if the data came in less than agreed
-    if (m_socket->bytesAvailable() < m_block_size)
+    if (socket->bytesAvailable() < m_block_size)
         return;
 
     // when we got the size, then we get our data
-    QByteArray data = m_socket->read(m_block_size);
+    QByteArray data = socket->read(m_block_size);
     qDebug() << "before encode\n" << data << "\n";
+
+    // OLD, WORKING CODE
+    // First of all we read the size of the message to be transmitted
+//    m_socket = qobject_cast<QTcpSocket*>(sender());
+
+//    QDataStream in(m_socket);
+//    in.setVersion(QDataStream::Qt_5_15);
+//    if (in.status() != QDataStream::Ok)
+//        gui->showErrorAndExit("DataStream error");
+
+//    if (m_block_size == 0) {
+//        if (m_socket->bytesAvailable() < static_cast<qint64>(sizeof(m_block_size)))
+//            return;
+//        in >> m_block_size;
+//    }
+
+//    // if the data came in less than agreed
+//    if (m_socket->bytesAvailable() < m_block_size)
+//        return;
+
+//    // when we got the size, then we get our data
+//    QByteArray data = m_socket->read(m_block_size);
+//    qDebug() << "before encode\n" << data << "\n";
 
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
@@ -141,7 +187,7 @@ void ServerBack::slotReadyRead()
     // so that we can read the following message
     m_block_size = 0;
     try {
-        determineMessage(message);
+        determineMessage(message, socket);
     }
     catch(const QSqlError& error) {
         gui->showErrorAndExit("Caught SQL error in func " + error.text());
@@ -154,10 +200,11 @@ void ServerBack::slotReadyRead()
     }
 }
 
-void ServerBack::determineMessage(const QJsonObject& message)
+void ServerBack::determineMessage(const QJsonObject& message, QTcpSocket *socket)
 {
+    // EVERYWHERE THERE IS A socket, IT USED TO BE m_socket!!!
     QJsonObject feedback;
-    if (message["type"] == "message" && authorizedAccess(message["from"].toString())) {
+    if (message["type"] == "message" && authorizedAccess(message["from"].toString(), socket)) {
         if (message["message"].toString().isEmpty()) return;
         feedback = sendMessage(message);
 
@@ -173,51 +220,51 @@ void ServerBack::determineMessage(const QJsonObject& message)
     // and send fully encrypted bytes
     else if (message["type"] == "key" ||
              message["type"] == "request a key")
-        sendToClient(message, m_socket);
+        sendToClient(message, socket);
 
     else if (message["type"] == "download correspondence" &&
-             authorizedAccess(message["username"].toString())) {
+             authorizedAccess(message["username"].toString(), socket)) {
         feedback = m_database->getMessages(
                     message["username"].toString(), message["with"].toString());
         feedback["type"] = message["type"];
-        sendToClient(feedback, m_socket);
+        sendToClient(feedback, socket);
     }
 
     else if (message["type"] == "update online users" &&
-             authorizedAccess(message["username"].toString()))
-        updatingOnlineUsers(m_socket);
+             authorizedAccess(message["username"].toString(), socket))
+        updatingOnlineUsers(socket);
 
     else if (message["type"] == "download chats" &&
-             authorizedAccess(message["username"].toString())) {
+             authorizedAccess(message["username"].toString(), socket)) {
         feedback["type"] = message["type"];
         feedback["array of users"] = m_database->getChats(message["username"].toString());
-        sendToClient(feedback, m_socket);
+        sendToClient(feedback, socket);
     }
 
     else if (message["type"] == "login" ||
              message["type"] == "registration") {
         feedback = regLogValidation(message);
         if (feedback["isCorrect"].toBool())
-            successEntry(message["username"].toString());
-        sendToClient(feedback, m_socket);
+            successEntry(message["username"].toString(), socket);
+        sendToClient(feedback, socket);
     }
 }
 
 // If such a user is not on the network or his socket is different,
 // then it is unauthorized access
-bool ServerBack::authorizedAccess(const QString& username) const {
+bool ServerBack::authorizedAccess(const QString& username, const QTcpSocket *socket) const {
     if (!m_sockets.contains(username)) return false;
 
     // User logged in illegally, so the socket in memory for him is different
-    if (m_sockets[username] != m_socket) return false;
+    if (m_sockets[username] != socket) return false;
     return true;
 }
 
 // Here need to display a message indicating
 // that there is a new user online
-void ServerBack::successEntry(const QString& username) {
+void ServerBack::successEntry(const QString& username, QTcpSocket *socket) {
     gui->online_user(username);
-    m_sockets[username] = m_socket;
+    m_sockets[username] = socket;
 }
 
 // Explanation of the error in the json line "feedback"
