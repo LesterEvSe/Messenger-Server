@@ -3,10 +3,8 @@
 #include <QJsonDocument>
 #include <QJsonParseError>
 #include <QJsonArray>
-#include <QByteArray>
-#include <QtSql/QSqlError>
 
-#include <QMessageBox>
+#include <QByteArray>
 
 ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
@@ -20,7 +18,7 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     m_database = gui->m_database;
 
     if (listen(QHostAddress::Any, 1326))
-        qDebug() << "Start listening port 1326...";
+        qDebug() << "Start listening port 1326..."; // Need to delete later
     else
         gui->showErrorAndExit("Port listening error");
 
@@ -35,13 +33,13 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
     // The descriptor is a positive number that identifies
     // the input/output stream
     m_socket->setSocketDescriptor(socketDescriptor);
-    connect(m_socket, &QTcpSocket::readyRead, this, &ServerBack::slotReadyRead);
+    connect(m_socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
     connect(m_socket, &QTcpSocket::disconnected, this, [=](){
         auto it = m_sockets.begin();
         QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
 
         for (; it != m_sockets.end(); ++it)
-            if (it.value().first == curr_socket)
+            if (it.value() == curr_socket)
                 break;
 
         if (it != m_sockets.end()) {
@@ -163,20 +161,9 @@ void ServerBack::determineMessage(const QJsonObject& message)
         if (message["message"].toString().isEmpty()) return;
         feedback = sendMessage(message);
 
-        /// The acknowledgment pattern has to be applied here
-        /// to confirm that the message is written to the DB,
-        /// so we have to send the JSON after all. DO IT!!!
-
-        // If sender == recipient or recipient offline
-        if (message["from"] == message["to"] ||
-                m_sockets.find(message["to"].toString()) == m_sockets.end());
-        // ; is plug for future
-            /// Here acknowledgment
-
-        // Recepient online
-        else
-            /// and here acknowledgment
-            sendToClient(feedback, m_sockets[message["to"].toString()].first);
+        if (message["from"] != message["to"] &&
+                m_sockets.contains(message["to"].toString()))
+            sendToClient(feedback, m_sockets[message["to"].toString()]);
 
         m_database->addMessage(message);
     }
@@ -207,14 +194,9 @@ void ServerBack::determineMessage(const QJsonObject& message)
         sendToClient(feedback, m_socket);
     }
 
-    else if (message["type"] == "login") {
-        feedback = login(message);
-        if (feedback["isCorrect"].toBool())
-            successEntry(message["username"].toString());
-        sendToClient(feedback, m_socket);
-    }
-    else if (message["type"] == "registration") {
-        feedback = registration(message);
+    else if (message["type"] == "login" ||
+             message["type"] == "registration") {
+        feedback = regLogValidation(message);
         if (feedback["isCorrect"].toBool())
             successEntry(message["username"].toString());
         sendToClient(feedback, m_socket);
@@ -227,7 +209,7 @@ bool ServerBack::authorizedAccess(const QString& username) const {
     if (!m_sockets.contains(username)) return false;
 
     // User logged in illegally, so the socket in memory for him is different
-    if (m_sockets[username].first != m_socket) return false;
+    if (m_sockets[username] != m_socket) return false;
     return true;
 }
 
@@ -235,13 +217,15 @@ bool ServerBack::authorizedAccess(const QString& username) const {
 // that there is a new user online
 void ServerBack::successEntry(const QString& username) {
     gui->online_user(username);
-    m_sockets[username].first = m_socket;
+    m_sockets[username] = m_socket;
 }
 
-
-
-QJsonObject ServerBack::registration(const QJsonObject& message)
+// Explanation of the error in the json line "feedback"
+QJsonObject ServerBack::regLogValidation(const QJsonObject& message)
 {
+    static constexpr unsigned short min_length {4};
+    static constexpr unsigned short max_length {64};
+
     QJsonObject feedback;
     feedback["type"] = message["type"];
     if (message["username"].toString().isEmpty() || message["password"].toString().isEmpty()) {
@@ -249,61 +233,50 @@ QJsonObject ServerBack::registration(const QJsonObject& message)
         feedback["feedback"] = "You need to fill in both input fields";
         return feedback;
     }
-    if (message["password"].toString().length() < 4) {
+    if (message["password"].toString().length() < min_length) {
         feedback["isCorrect"] = false;
         feedback["feedback"] = "The password must contain at least 4 characters";
         return feedback;
     }
-
-    if (message["username"].toString().length() > 64) {
+    if (message["username"].toString().length() > max_length) {
         feedback["isCorrect"] = false;
         feedback["feedback"] = "Username is too long";
         return feedback;
     }
-
-    if (message["password"].toString().length() > 64) {
+    if (message["password"].toString().length() > max_length) {
         feedback["isCorrect"] = false;
         feedback["feedback"] = "Password is too long";
         return feedback;
     }
-
-    if (!m_database->registrationValidation(message, feedback))
-        return feedback;
-
-    QJsonArray arr;
-    for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
-        arr.append(it.key());
-
-    feedback["isCorrect"] = true;
-    feedback["feedback"]  = arr;
-    return feedback;
-}
-
-// Explanation of the error in the json line "feedback"
-QJsonObject ServerBack::login(const QJsonObject& message)
-{
-    QJsonObject feedback;
-    feedback["type"] = message["type"];
-    if (message["username"].toString().isEmpty() || message["password"].toString().isEmpty()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"] = "You need to fill in both input fields";
-        return feedback;
-    }
-    if (message["password"].toString().length() < 4) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"] = "The password must contain at least 4 characters";
-        return feedback;
-    }
-
     if (m_sockets.find(message["username"].toString()) != m_sockets.end()) {
         feedback["isCorrect"] = false;
         feedback["feedback"]  = "User is online now";
         return feedback;
     }
 
-    if (!m_database->loginValidation(message, feedback))
-        return feedback;
+    // Check for validation type
+    if (message["type"] == "registration") {
+        if (!m_database->registrationValidation(message)) {
+            feedback["isCorrect"] = false;
+            feedback["feedback"]  = "This username is already taken";
+            return feedback;
+        }
 
+        QJsonArray arr;
+        for (auto it = m_sockets.begin(); it != m_sockets.end(); ++it)
+            arr.append(it.key());
+
+        feedback["isCorrect"] = true;
+        feedback["feedback"]  = arr;
+        return feedback;
+    }
+
+    // Login Validation
+    if (!m_database->loginValidation(message)) {
+        feedback["isCorrect"] = false;
+        feedback["feedback"]  = "Incorrect nickname or password";
+        return feedback;
+    }
     feedback["isCorrect"] = true;
     return feedback;
 }

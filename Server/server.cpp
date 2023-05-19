@@ -49,6 +49,7 @@ void Server::offline_user(const QString &username)
 
 void Server::updateChats()
 {
+    ui->currChatLabel->setText("Choose Chat");
     ui->chatsListWidget->clear();
     QJsonArray user_chats = m_database->getChats(windowTitle());
     for (int i = 0; i < user_chats.size(); ++i)
@@ -66,10 +67,12 @@ void Server::updateCorrespondence()
     for (int coun = 0, our_mess_coun = 0; coun < chat_array.size(); ++coun)
     {
         QString nick;
-        if (coun == mess_num[our_mess_coun].toInt())
-            nick = ui->currChatLabel->text();
-        else
+        if (coun == mess_num[our_mess_coun].toInt()) {
             nick = windowTitle();
+            ++our_mess_coun;
+        }
+        else
+            nick = ui->currChatLabel->text();
         m_chats[pair].first->append(nick + ": " + chat_array[coun].toString());
         m_chats[pair].first->append("");
     }

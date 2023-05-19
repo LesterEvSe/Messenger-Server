@@ -13,8 +13,8 @@ private:
 public:
     Database();
 
-    bool loginValidation        (const QJsonObject& message, QJsonObject& feedback);
-    bool registrationValidation (const QJsonObject& message, QJsonObject& feedback);
+    bool loginValidation        (const QJsonObject& message);
+    bool registrationValidation (const QJsonObject& message);
 
     bool findUser               (const QString& user) const;
     bool addMessage             (const QJsonObject& message);

@@ -46,7 +46,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>Chat</string>
+        <string>Choose Chat</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

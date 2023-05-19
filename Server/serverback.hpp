@@ -28,7 +28,8 @@ private:
     // Working with the Database will be in a separate class
     std::shared_ptr<Database> m_database;
 
-    // Here we store the username and QPair
+    // about m_sockets and m_messages
+    // The socket from m_sockets relates to the key socket here
     /*
        We also need to store messages on the server.
        That is, the server will act as client and encode/decode each message.
@@ -39,20 +40,26 @@ private:
     */
     /*
        Why shared_ptr instead of unique_ptr?
-       Because when we take a value or iterate, ite temporarily copies the object
+       Because when we take a value or iterate, it temporarily copies the object
        so we can do something with it later.
        For unique_ptr this unacceptable, so the solution is shared_ptr
     */
-    QHash<QString, QPair<QTcpSocket*, std::shared_ptr<QJsonObject>>> m_sockets;
-    QTcpSocket *m_socket;
+
+    // Here we store the username and its socket
+    QHash<QString, QTcpSocket*> m_sockets;
+    mutable QHash<QTcpSocket*, std::shared_ptr<QJsonObject>> m_messages;
+
+    QTcpSocket *m_socket; // Need to delete later
 
     Encryption *m_encryption;
-    mutable QJsonObject m_message;
+
+    mutable QJsonObject m_message; // Need to delete later
 
     void sendToClient        (const QJsonObject& message, QTcpSocket *client) const;
     void updatingOnlineUsers (QTcpSocket *client) const;
 
     void successEntry        (const QString& username);
+    QJsonObject regLogValidation       (const QJsonObject& message);
     QJsonObject registration (const QJsonObject& message);
     QJsonObject login        (const QJsonObject& message);
     QJsonObject sendMessage  (const QJsonObject& message);

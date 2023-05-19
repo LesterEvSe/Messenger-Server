@@ -33,7 +33,7 @@ Database::Database() :
     }
 }
 
-bool Database::loginValidation(const QJsonObject& message, QJsonObject& feedback)
+bool Database::loginValidation(const QJsonObject& message)
 {
     QSqlQuery query;
     query.prepare("SELECT password FROM users WHERE username = :username");
@@ -42,17 +42,13 @@ bool Database::loginValidation(const QJsonObject& message, QJsonObject& feedback
     if (!query.exec())
         throw QSqlError(query.lastError().text(), QString("'login validation'; "));
 
-    if (!query.next() || message["password"].toString() != query.value(0).toString()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "Incorrect nickname or password";
-
+    if (!query.next() || message["password"].toString() != query.value(0).toString())
         return false;
-    }
 
     return true;
 }
 
-bool Database::registrationValidation(const QJsonObject& message, QJsonObject& feedback)
+bool Database::registrationValidation(const QJsonObject& message)
 {
     QSqlQuery query;
     query.prepare("SELECT password FROM users WHERE username = :username");
@@ -63,11 +59,8 @@ bool Database::registrationValidation(const QJsonObject& message, QJsonObject& f
         throw QSqlError(query.lastError().text(),
                         QString("'registration validation' error 1; "));
 
-    if (query.next()) {
-        feedback["isCorrect"] = false;
-        feedback["feedback"]  = "This username is already taken";
+    if (query.next())
         return false;
-    }
 
     query.prepare("INSERT INTO users (username, password) values (:username, :password);");
     query.bindValue(":username", message["username"].toString());
