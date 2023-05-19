@@ -48,21 +48,17 @@ private:
     // Here we store the username and its socket
     QHash<QString, QTcpSocket*> m_sockets;
     mutable QHash<QTcpSocket*, std::shared_ptr<QJsonObject>> m_messages;
-
-    QTcpSocket *m_socket; // Need to delete later
-
     Encryption *m_encryption;
 
+    QTcpSocket *m_socket; // Need to delete later
     mutable QJsonObject m_message; // Need to delete later
 
     void sendToClient        (const QJsonObject& message, QTcpSocket *client) const;
     void updatingOnlineUsers (QTcpSocket *client) const;
 
-    void successEntry        (const QString& username);
-    QJsonObject regLogValidation       (const QJsonObject& message);
-    QJsonObject registration (const QJsonObject& message);
-    QJsonObject login        (const QJsonObject& message);
-    QJsonObject sendMessage  (const QJsonObject& message);
+    void successEntry               (const QString& username);
+    QJsonObject regLogValidation    (const QJsonObject& message);
+    QJsonObject sendMessage         (const QJsonObject& message);
 
     // Full verification of unauthorized access
     bool authorizedAccess    (const QString& username) const;

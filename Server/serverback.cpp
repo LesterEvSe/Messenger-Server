@@ -10,8 +10,8 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
     gui(ui),
     m_block_size(0),
-    m_socket(nullptr),
-    m_encryption(Encryption::get_instance())
+    m_encryption(Encryption::get_instance()),
+    m_socket(nullptr)
 {
     // Now two owners of the same resource
     // As the Server class is created before the ServerBack
