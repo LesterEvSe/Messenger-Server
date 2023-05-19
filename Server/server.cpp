@@ -67,7 +67,7 @@ void Server::updateCorrespondence()
     for (int coun = 0, our_mess_coun = 0; coun < chat_array.size(); ++coun)
     {
         QString nick;
-        if (coun == mess_num[our_mess_coun].toInt()) {
+        if (!mess_num.empty() && coun == mess_num[our_mess_coun].toInt()) {
             nick = windowTitle();
             ++our_mess_coun;
         }
