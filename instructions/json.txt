@@ -50,6 +50,7 @@ type			= download chats
 array of users  = All of the user's chats
 
 type 			= download correspondence
+with			= ...
 chat array		= ... // Here are messages from both users
 our messages_id	= ... // Here are our message numbers.
 	Counting down from 0. The rest are from another user

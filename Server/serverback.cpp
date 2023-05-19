@@ -33,11 +33,13 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
     // The descriptor is a positive number that identifies
     // the input/output stream
     socket->setSocketDescriptor(socketDescriptor);
+
     connect(socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, [=](){
-        auto it = m_sockets.begin();
         QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
+        m_messages.remove(curr_socket);
 
+        auto it  = m_sockets.begin();
         for (; it != m_sockets.end(); ++it)
             if (it.value() == curr_socket)
                 break;
@@ -48,29 +50,6 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
         }
         curr_socket->deleteLater();
     });
-
-
-    // OLD, WORKING CODE
-//    m_socket = new QTcpSocket(this);
-
-    // The descriptor is a positive number that identifies
-    // the input/output stream
-//    m_socket->setSocketDescriptor(socketDescriptor);
-//    connect(m_socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
-//    connect(m_socket, &QTcpSocket::disconnected, this, [=](){
-//        auto it = m_sockets.begin();
-//        QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
-
-//        for (; it != m_sockets.end(); ++it)
-//            if (it.value() == curr_socket)
-//                break;
-
-//        if (it != m_sockets.end()) {
-//            gui->offline_user(it.key());
-//            m_sockets.erase(it);
-//        }
-//        curr_socket->deleteLater();
-//    });
 }
 
 void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) const
@@ -84,22 +63,21 @@ void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) co
     }
     else if (message["type"] == "key") {
         QByteArray cipher_key = message["key"].toString().toUtf8();
-        data = QJsonDocument(m_message).toJson(QJsonDocument::Compact);
-        qDebug() << "before encode in sendToClient \n" << data;
+        data = QJsonDocument(*m_messages[client]).toJson(QJsonDocument::Compact);
 
         data = m_encryption->encode(data, cipher_key);
-        qDebug() << "after encode in sendToClient \n" << data;
-        m_message = QJsonObject();
+        m_messages[client] = nullptr;
     }
-    else if (m_message.isEmpty()) {
-        qDebug() << "m_message is empty ";
-        m_message = message;
+
+    // Executed when m_messages[client] is empty
+    else {
+        m_messages[client] = std::make_shared<QJsonObject>(message);
         QJsonObject request;
         request["type"] = "request a key";
         data = QJsonDocument(request).toJson(QJsonDocument::Compact);
     }
-    else
-        data = QJsonDocument(message).toJson(QJsonDocument::Compact);
+    // There is no fourth. Because if the message is NOT empty,
+    // then we have an encryption key (second block)
 
     QDataStream out(client);
 
@@ -140,30 +118,6 @@ void ServerBack::slotReadyRead()
 
     // when we got the size, then we get our data
     QByteArray data = socket->read(m_block_size);
-    qDebug() << "before encode\n" << data << "\n";
-
-    // OLD, WORKING CODE
-    // First of all we read the size of the message to be transmitted
-//    m_socket = qobject_cast<QTcpSocket*>(sender());
-
-//    QDataStream in(m_socket);
-//    in.setVersion(QDataStream::Qt_5_15);
-//    if (in.status() != QDataStream::Ok)
-//        gui->showErrorAndExit("DataStream error");
-
-//    if (m_block_size == 0) {
-//        if (m_socket->bytesAvailable() < static_cast<qint64>(sizeof(m_block_size)))
-//            return;
-//        in >> m_block_size;
-//    }
-
-//    // if the data came in less than agreed
-//    if (m_socket->bytesAvailable() < m_block_size)
-//        return;
-
-//    // when we got the size, then we get our data
-//    QByteArray data = m_socket->read(m_block_size);
-//    qDebug() << "before encode\n" << data << "\n";
 
     QJsonParseError error;
     QJsonDocument doc = QJsonDocument::fromJson(data, &error);
@@ -172,9 +126,6 @@ void ServerBack::slotReadyRead()
     // Otherwise we get the key
     if (error.error != QJsonParseError::NoError) {
         data = m_encryption->decode(data);
-        qDebug() << "Cipher key\n" << m_encryption->get_n() << '\n';
-
-        qDebug() << "\n" << "Decoded data\n" << data;
         doc = QJsonDocument::fromJson(data, &error);
 
         // If after decryption we get an error
@@ -224,9 +175,12 @@ void ServerBack::determineMessage(const QJsonObject& message, QTcpSocket *socket
 
     else if (message["type"] == "download correspondence" &&
              authorizedAccess(message["username"].toString(), socket)) {
+
         feedback = m_database->getMessages(
                     message["username"].toString(), message["with"].toString());
+
         feedback["type"] = message["type"];
+        feedback["with"] = message["with"];
         sendToClient(feedback, socket);
     }
 
