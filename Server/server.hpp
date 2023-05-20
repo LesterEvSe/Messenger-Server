@@ -31,13 +31,14 @@ class Server : public QWidget
 {
     Q_OBJECT
     friend class ServerBack;
+
 private:
     Ui::Server *ui;
     std::shared_ptr<Database> m_database;
 
     // The data are stored as follows: the pair username1, username2,
     // their chat window QTextBrowser, and the index in the stackWidget 'int'
-    QHash<QPair<QString, QString>, std::pair<QTextBrowser*, int>> m_chats;
+    QHash<QPair<QString, QString>, QPair<QTextBrowser*, int>> m_chats;
 
     void showErrorAndExit   (const QString& error);
     void online_user        (const QString& username);

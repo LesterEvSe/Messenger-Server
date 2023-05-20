@@ -153,4 +153,3 @@ QJsonArray Database::getChats(const QString &user) const
         arr.append(query.value(0).toString());
     return arr;
 }
-

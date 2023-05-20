@@ -1,7 +1,7 @@
 #include "encryption.hpp"
 
-#include <chrono> // for more accuracy in createPrime function
-#include <memory>
+#include <random>
+#include <memory> // for smart pointer
 #include <string>
 
 Encryption::Encryption()
@@ -17,7 +17,7 @@ Encryption::Encryption()
     mpz_class fi_n = (p - mpz_class(1)) * (q - mpz_class(1));
 
     // 4. Selecting the recommended value of 'e'
-    e = 65537;
+    e = 65'537;
 
     // 5. Calculate private key;
     // mpz_class is a C++ class wrapper, for the C structure mpz_t.
@@ -46,12 +46,12 @@ mpz_class Encryption::createPrime()
     gmp_randinit_default(state);
 
     // For more accuracy
-    std::chrono::high_resolution_clock::duration seed =
-            std::chrono::high_resolution_clock::now().time_since_epoch();
+    std::random_device rd;
+    std::random_device::result_type seed = rd();
 
     // Set a random generator state
     // seed.count() - get the number of ticks
-    gmp_randseed_ui(state, seed.count());
+    gmp_randseed_ui(state, seed);
 
     // Generating a 2048-bit prime number
     do {
@@ -138,4 +138,3 @@ QByteArray Encryption::decode(const QByteArray& bytes) const
     }
     return answer;
 }
-
