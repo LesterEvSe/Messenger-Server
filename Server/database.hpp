@@ -5,13 +5,20 @@
 
 #include <QtSql>
 
+// Singleton class
 class Database
 {
 private:
     QSqlDatabase m_messenger;
 
-public:
+    Database(const Database&) = delete;
+    Database(Database&&)      = delete;
+    Database& operator=(const Database&) = delete;
+    Database& operator=(Database&&)      = delete;
     Database();
+
+public:
+    static Database* get_instance();
 
     bool loginValidation        (const QJsonObject& message);
     bool registrationValidation (const QJsonObject& message);

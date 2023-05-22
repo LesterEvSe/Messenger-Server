@@ -33,6 +33,11 @@ Database::Database() :
     }
 }
 
+Database* Database::get_instance() {
+    static Database database = Database();
+    return &database;
+}
+
 bool Database::loginValidation(const QJsonObject& message)
 {
     QSqlQuery query;

@@ -29,6 +29,11 @@ Encryption::Encryption()
     mpz_invert(d.get_mpz_t(), e.get_mpz_t(), fi_n.get_mpz_t());
 }
 
+Encryption* Encryption::get_instance() {
+    static Encryption rsa = Encryption();
+    return &rsa;
+}
+
 QByteArray Encryption::get_n() const
 {
     std::string str = n.get_str();

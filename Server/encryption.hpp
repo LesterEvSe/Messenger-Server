@@ -40,10 +40,7 @@ private:
     Encryption();
 
 public:
-    static Encryption* get_instance() {
-        static Encryption rsa = Encryption();
-        return &rsa;
-    }
+    static Encryption* get_instance();
 
     // UTF-8 format
     QByteArray get_n() const;

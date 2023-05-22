@@ -34,7 +34,7 @@ class Server : public QWidget
 
 private:
     Ui::Server *ui;
-    std::shared_ptr<Database> m_database;
+    Database* m_database;
 
     // The data are stored as follows: the pair username1, username2,
     // their chat window QTextBrowser, and the index in the stackWidget 'int'

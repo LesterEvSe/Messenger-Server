@@ -6,10 +6,9 @@
 
 Server::Server(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Server)
+    ui(new Ui::Server),
+    m_database(Database::get_instance())
 {
-    m_database = std::make_shared<Database>();
-
     ui->setupUi(this);
     setWindowTitle("Server");
     ui->findUserLineEdit->setPlaceholderText("Find user...");

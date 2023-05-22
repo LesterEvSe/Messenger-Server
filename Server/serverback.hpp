@@ -26,7 +26,7 @@ private:
     qint64 m_block_size;
 
     // Working with the Database will be in a separate class
-    std::shared_ptr<Database> m_database;
+    Database *m_database;
 
     // about m_sockets and m_messages
     // The socket from m_sockets relates to the key socket here

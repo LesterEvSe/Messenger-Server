@@ -10,11 +10,9 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     QTcpServer(parent),
     gui(ui),
     m_block_size(0),
+    m_database(Database::get_instance()),
     m_encryption(Encryption::get_instance())
 {
-    // Now two owners of the same resource
-    // As the Server class is created before the ServerBack
-    m_database = gui->m_database;
 
     if (listen(QHostAddress::Any, 1326))
         qDebug() << "Start listening port 1326..."; // Need to delete later
