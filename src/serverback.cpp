@@ -221,7 +221,7 @@ void ServerBack::successEntry(const QString& username, QTcpSocket *socket) {
 QJsonObject ServerBack::regLogValidation(const QJsonObject& message)
 {
     static constexpr unsigned short min_length {4};
-    static constexpr unsigned short max_length {64};
+    static constexpr unsigned short max_length {32};
 
     QJsonObject feedback;
     feedback["type"] = message["type"];
