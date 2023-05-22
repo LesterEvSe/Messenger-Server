@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>res/correspondence.png</file>
+        <file>res/online-users.png</file>
+	</qresource>
+	<qresource prefix="/">
+        <file>server.css</file>
+    </qresource>
+</RCC>

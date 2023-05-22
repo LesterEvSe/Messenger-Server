@@ -4,6 +4,10 @@
 #include <QScreen>
 #include <QMessageBox>
 
+#include <QFile>
+#include <QTextStream>
+#include <QPixmap>
+
 Server::Server(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Server),
@@ -17,10 +21,34 @@ Server::Server(QWidget *parent) :
     int w = screenGeometry.width();
     int h = screenGeometry.height();
     move((w - width())/2, (h - height())/2);
+    setStyles();
 }
 
-Server::~Server() {
-    delete ui;
+Server::~Server() { delete ui; }
+
+QString Server::readTextFile(QString path)
+{
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&file);
+        return in.readAll();
+    }
+    return "";
+}
+
+void Server::setStyles()
+{
+    QPixmap pix1(":/res/correspondence.png");
+    QPixmap scaledPixmap = pix1.scaled(QSize(48, 48), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->chatsLabel->setPixmap(scaledPixmap);
+
+    QPixmap pix2(":/res/online-users.png");
+    scaledPixmap = pix2.scaled(QSize(48, 48), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->onlineUsersLabel->setPixmap(scaledPixmap);
+
+    QString css = readTextFile(":/server.css");
+    if (!css.isEmpty())
+        this->setStyleSheet(css);
 }
 
 void Server::showErrorAndExit(const QString &error) {

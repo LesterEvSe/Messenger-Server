@@ -1,0 +1,38 @@
+/* QListWidget */
+QListWidget {
+    border-radius: 5px;
+    padding: 5px;
+}
+
+QListWidget::item {
+    border-radius: 5px;
+    padding: 5px;
+}
+
+QListWidget::item:selected {
+    background-color: #5ADFD5;
+    color: #FFFFFF;
+    border: 1px solid #5ADFD5;
+}
+
+QListWidget::item:hover {
+    background-color: #00C4B0;
+    border: 1px solid #5ADFD5;
+}
+
+QListWidget::item:selected:hover {
+    background-color: #5ADFD5;
+}
+
+QListWidget::item:selected:focus {
+    outline: none;
+}
+
+
+/* QTextBrowser */
+QTextBrowser {
+    border-radius: 10px;
+    padding: 5px;
+    font-size: 18px;
+}
+

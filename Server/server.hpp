@@ -34,7 +34,7 @@ class Server : public QWidget
 
 private:
     Ui::Server *ui;
-    Database* m_database;
+    Database *m_database;
 
     // The data are stored as follows: the pair username1, username2,
     // their chat window QTextBrowser, and the index in the stackWidget 'int'
@@ -49,6 +49,9 @@ private:
     // and currChatLabel as the user we are communicating with
     void updateChats();
     void updateCorrespondence();
+
+    void setStyles();
+    static QString readTextFile(QString path);
 
 private slots:
     void on_chatsListWidget_itemClicked(QListWidgetItem *item);
