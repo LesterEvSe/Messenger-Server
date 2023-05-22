@@ -13,12 +13,8 @@ ServerBack::ServerBack(Server *ui, QObject *parent) :
     m_database(Database::get_instance()),
     m_encryption(Encryption::get_instance())
 {
-
-    if (listen(QHostAddress::Any, 1326))
-        qDebug() << "Start listening port 1326..."; // Need to delete later
-    else
+    if (!listen(QHostAddress::Any, 1326))
         gui->showErrorAndExit("Port listening error");
-
     gui->show();
 }
 
@@ -31,23 +27,25 @@ void ServerBack::incomingConnection(qintptr socketDescriptor)
     // The descriptor is a positive number that identifies
     // the input/output stream
     socket->setSocketDescriptor(socketDescriptor);
-
     connect(socket, &QTcpSocket::readyRead,    this, &ServerBack::slotReadyRead);
-    connect(socket, &QTcpSocket::disconnected, this, [=](){
-        QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
-        m_messages.remove(curr_socket);
+    connect(socket, &QTcpSocket::disconnected, this, &ServerBack::disconnectClient);
+}
 
-        auto it  = m_sockets.begin();
-        for (; it != m_sockets.end(); ++it)
-            if (it.value() == curr_socket)
-                break;
+void ServerBack::disconnectClient()
+{
+    QTcpSocket *curr_socket = qobject_cast<QTcpSocket*>(sender());
+    m_messages.remove(curr_socket);
 
-        if (it != m_sockets.end()) {
-            gui->offline_user(it.key());
-            m_sockets.erase(it);
-        }
-        curr_socket->deleteLater();
-    });
+    auto it  = m_sockets.begin();
+    for (; it != m_sockets.end(); ++it)
+        if (it.value() == curr_socket)
+            break;
+
+    if (it != m_sockets.end()) {
+        gui->offline_user(it.key());
+        m_sockets.erase(it);
+    }
+    curr_socket->deleteLater();
 }
 
 void ServerBack::sendToClient(const QJsonObject& message, QTcpSocket *client) const

@@ -69,6 +69,7 @@ private:
 private slots:
     void incomingConnection(qintptr socketDescriptor);
     void slotReadyRead();
+    void disconnectClient();
 
 public:
     /// WHY WE DO NOT NEED A DESTRUCTOR
