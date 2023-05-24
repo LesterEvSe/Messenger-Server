@@ -7,7 +7,7 @@ Read **Linux build** for Linux OS and **Windows build** for Windows respectively
 # Linux build
 ## Requirements
 To run the project you need to install the Qt5 and GMP
-### Qt install
+### Qt install. Install Qt in the /home directory, otherwise the paths to the Qt files will not be found
 ###### Note: Replace 'name' with the name of your executable
 1. Install Qt https://www.qt.io/download-qt-installer
 2. Go to the download where our *.run* file is installed. Before we run it,
@@ -51,4 +51,21 @@ in the project folder with the command ***mkdir build***
 7. Now you can run the application with the ***./Server*** command.
 
 
-# Windows build
+# Windows build with Qt Creator
+1. Install Qt5 https://www.qt.io/download-open-source  
+2. In addition to the default packages, choose these packages for Qt5
+MSVC 2019 for your system (64 or 32 bit)  
+MinGW 8.1.0. In Developer and Designer Tools select MinGW 11.2.0
+3. Install msys2 https://www.msys2.org/.  
+As an administrator, type this command into the cmd  
+***setx PATH "%PATH%;C:\msys64\usr\bin" /M***
+4. After setting the paths, start our msys2 (or restart it)
+5. Download the GMP library (on the C drive, version 6.2.1 package .xz or .lz) https://gmplib.org/
+6. Now go to the folder where you installed gmp and call the following commands one after the other  
+***./configure***  
+***make***  
+***make check***  
+***make install***  
+
+## Run
+Now run projects with Qt Creator and build them with the MinGW compiler
