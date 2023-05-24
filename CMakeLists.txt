@@ -68,11 +68,12 @@ elseif (WIN32)
 endif()
 
 # Link libraries
-target_link_libraries(Client PRIVATE
+target_link_libraries(Server PRIVATE
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     Qt5::Network
+    Qt5::Sql
     ${GMP_LIB}
 )
 

@@ -1,4 +1,4 @@
-# Messenger-Client
+# Messenger-Server
 Server application messenger using library Qt5 and GMP library.
 Designed for network communication with other users.
 Messages are encrypted using a 2048-bit RSA key, as well as stored on the server.  
