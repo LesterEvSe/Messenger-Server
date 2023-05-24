@@ -2,12 +2,12 @@
 Server application messenger using library Qt5 and GMP library.
 Designed for network communication with other users.
 Messages are encrypted using a 2048-bit RSA key, as well as stored on the server.  
-Read **Linux build** for Linux OS and **Windows build** for Windows respectively.
+Read **Linux build** for build on Linux OS.
 
 # Linux build
 ## Requirements
 To run the project you need to install the Qt5 and GMP
-### Qt install
+### Qt install. Install Qt in the /home directory, otherwise the paths to the Qt files will not be found
 ###### Note: Replace 'name' with the name of your executable
 1. Install Qt https://www.qt.io/download-qt-installer
 2. Go to the download where our *.run* file is installed. Before we run it,
@@ -49,6 +49,3 @@ in the project folder with the command ***mkdir build***
 5. Next, you need to run ***cmake ..*** command inside "build" directory. 
 6. Finally, use the ***make*** command to compile, link the project, and create an executable. 
 7. Now you can run the application with the ***./Server*** command.
-
-
-# Windows build
