@@ -12,7 +12,7 @@ To run the project you need to install the Qt5 and GMP
 1. Install Qt https://www.qt.io/download-qt-installer
 2. Go to the download where our *.run* file is installed. Before we run it,
 we need to give permission to run it, using the command ***chmod +x 'name'***
-3. Запускаем наш файл ***./'name'***
+3. Run our file ***./'name'***
 4. During the installation you can not install CMake, Ninja, Qt Creator components.
 However, it is **necessary** to select *Desktop gcc 64* or *gcc 32* for Qt5,
 otherwise the project will not build.
