@@ -81,7 +81,7 @@ bool Database::registrationValidation(const QJsonObject& message)
 
 
 
-bool Database::findUser(const QString &user) const
+bool Database::findUser(const QString& user) const
 {
     QSqlQuery query;
     query.prepare("SELECT username FROM users WHERE username = :user");
@@ -95,7 +95,7 @@ bool Database::findUser(const QString &user) const
     return query.next();
 }
 
-bool Database::addMessage(const QJsonObject &message)
+bool Database::addMessage(const QJsonObject& message)
 {
     QSqlQuery query;
     query.prepare("INSERT INTO message (sender, recipient, message, data_time) "
@@ -111,7 +111,6 @@ bool Database::addMessage(const QJsonObject &message)
     return true;
 }
 
-// Don't work if user1 == user2
 QJsonObject Database::getMessages(const QString& user1, const QString& user2) const
 {
     QSqlQuery query;
@@ -140,9 +139,10 @@ QJsonObject Database::getMessages(const QString& user1, const QString& user2) co
     return json;
 }
 
-QJsonArray Database::getChats(const QString &user) const
+QJsonArray Database::getChats(const QString& user) const
 {
-    // To get all chats, 1. select all users to whom we wrote
+    // To get all chats
+    // 1. select all users to whom we wrote
     // 2. Select all users who wrote to us
     // 3. Union and delete repetitions
     QSqlQuery query;
