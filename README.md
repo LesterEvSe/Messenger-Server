@@ -31,18 +31,14 @@ otherwise the project will not build.
 * Arch Linux ***sudo pacman -S gmp***  
 2. Install compiler for C++ and build system with the commands
 * Ubuntu, Debian and Linux Mint  
-  ***sudo apt-get update
-  sudo apt-get install g++
-  sudo apt-get install cmake***  
+  ***sudo apt-get update  
+  sudo apt-get install g++ cmake***  
 * Fedora  
-  ***sudo dnf install gcc-c++
-  sudo dnf install cmake***  
+  ***sudo dnf install gcc-c++ cmake***  
 * CentOS and RHEL  
-  ***sudo yum install gcc-c++
-  sudo yum install cmake***  
+  ***sudo yum install gcc-c++ cmake***  
 * Arch Linux  
-  ***sudo pacman -S gcc
-  sudo pacman -S cmake***  
+  ***sudo pacman -S gcc cmake***  
 3. To build a project, you need to make a "build" directory 
 in the project folder with the command ***mkdir build***
 4. Then move into it with the command ***cd build*** 
