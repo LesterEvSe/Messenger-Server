@@ -25,19 +25,19 @@ otherwise the project will not build.
 
 ## Build and run
 1. Need to install the GMP library: https://gmplib.org/ or with commands in the console:  
-* Ubuntu/Debian/Linux Mint ***sudo apt-get install libgmp-dev***  
+* Ubuntu, Debian and Linux Mint ***sudo apt-get install libgmp-dev***  
 * Fedora ***sudo dnf install gmp-devel***  
-* CentOS и RHEL ***sudo yum install gmp-devel***  
+* CentOS and RHEL ***sudo yum install gmp-devel***  
 * Arch Linux ***sudo pacman -S gmp***  
 2. Install compiler for C++ and build system with the commands
-* Ubuntu/Debian/Linux Mint  
+* Ubuntu, Debian and Linux Mint  
   ***sudo apt-get update
   sudo apt-get install g++
   sudo apt-get install cmake***  
 * Fedora  
   ***sudo dnf install gcc-c++
   sudo dnf install cmake***  
-* CentOS и RHEL  
+* CentOS and RHEL  
   ***sudo yum install gcc-c++
   sudo yum install cmake***  
 * Arch Linux  
