@@ -111,20 +111,13 @@
       </widget>
      </item>
      <item>
-      <widget class="QStackedWidget" name="stackedWidget">
+      <widget class="QTextBrowser" name="textBrowser">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>4</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <widget class="QWidget" name="user">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QTextBrowser" name="textBrowser"/>
-         </item>
-        </layout>
-       </widget>
       </widget>
      </item>
      <item>

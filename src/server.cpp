@@ -56,7 +56,6 @@ void Server::showErrorAndExit(const QString &error) {
     exit(1);
 }
 
-
 void Server::online_user(const QString &username) {
     ui->onlineUsersListWidget->addItem(username);
 }
@@ -83,11 +82,11 @@ void Server::updateChats()
         ui->chatsListWidget->addItem(user_chats[i].toString());
 }
 
-void Server::updateCorrespondence()
+void Server::on_chatsListWidget_itemClicked(QListWidgetItem *item)
 {
-    QPair<QString, QString> pair(windowTitle(), ui->currChatLabel->text());
-    m_chats[pair].first->clear();
-    QJsonObject chat = m_database->getMessages(pair.first, pair.second);
+    ui->currChatLabel->setText(item->text());
+    ui->textBrowser->clear();
+    QJsonObject chat = m_database->getMessages(windowTitle(), ui->currChatLabel->text());
 
     QJsonArray chat_array = chat["chat array"].toArray();
     QJsonArray mess_num = chat["our messages_id"].toArray();
@@ -100,33 +99,11 @@ void Server::updateCorrespondence()
         }
         else
             nick = ui->currChatLabel->text();
-        m_chats[pair].first->append(nick + ": " + chat_array[coun].toString());
-        m_chats[pair].first->append("");
+
+        ui->textBrowser->append(nick + ": " + chat_array[coun].toString());
+        ui->textBrowser->append("");
     }
 }
-
-void Server::on_chatsListWidget_itemClicked(QListWidgetItem *item)
-{
-    ui->currChatLabel->setText(item->text());
-    QPair<QString, QString> pair(windowTitle(), item->text());
-    if (m_chats.find(pair) != m_chats.end()) {
-        updateCorrespondence();
-        ui->stackedWidget->setCurrentIndex(m_chats[pair].second);
-        return;
-    }
-
-    QTextBrowser *browser = new QTextBrowser(this);
-    m_chats[pair] = { browser, ui->stackedWidget->count() };
-
-    QWidget *widget = new QWidget();
-    QVBoxLayout *layout = new QVBoxLayout(widget);
-    layout->addWidget(browser);
-
-    ui->stackedWidget->addWidget(widget);
-    updateCorrespondence();
-    ui->stackedWidget->setCurrentIndex(m_chats[pair].second);
-}
-
 
 
 // Next two functions have the same purpose.

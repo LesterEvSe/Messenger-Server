@@ -36,19 +36,13 @@ private:
     Ui::Server *ui;
     Database *m_database;
 
-    // The data are stored as follows: the pair username1, username2,
-    // their chat window QTextBrowser, and the index in the stackWidget 'int'
-    QHash<QPair<QString, QString>, QPair<QTextBrowser*, int>> m_chats;
-
     void showErrorAndExit   (const QString& error);
     void online_user        (const QString& username);
     void offline_user       (const QString& username);
 
-    // In the following two functions,
     // we use windowTitle() as m_username
     // and currChatLabel as the user we are communicating with
     void updateChats();
-    void updateCorrespondence();
 
     void setStyles();
     static QString readTextFile(QString path);
